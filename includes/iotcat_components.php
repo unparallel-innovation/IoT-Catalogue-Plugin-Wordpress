@@ -8,12 +8,74 @@ class IoTCat_components {
 
 		add_action('manage_iotcat_component_posts_columns',array($this,'columns'),10,2);
 		add_action('manage_iotcat_component_posts_custom_column',array($this,'column_data'),11,2);
+		add_action('wp_head', array($this,'hook_javascript'));
 		//sanitize_title("fdsdf sDGF DFgdf g-sdfg sdfg sdfg~dfsg sdf");
 		$this->name = $name;
 		$this->singular_name = $singular_name;
 		$this->post_type = $post_type;
 	//	add_filter('posts_join',array($this,'join'),10,1);
 		//add_filter('posts_orderby',array($this,'set_default_sort'),20,2);
+	}
+
+	function hook_javascript() {
+
+		if(get_post_type() === $this->post_type){
+
+			?>
+					<style>
+							#iotcat-iframe{
+								border: 0px;
+							}
+							.iotcat-component-img {
+								height: 200px;
+
+							}
+
+							.iotcat-component-img-container {
+								display: flex;
+						    justify-content: center;
+						    margin-bottom: 10px;
+
+							}
+	        </style>
+					<script>
+							const maxRetries = 500;
+							const waitTime = 10;
+							function getIframeRecursive(resolve, reject, retryCount = 0 ){
+								const iframe = document.getElementById("iotcat-iframe");
+								console.log("getIframeRecursive",iframe)
+								if(retryCount > maxRetries){
+									reject("Max retries exceeded");
+								}else if(!iframe){
+									setTimeout(()=>{getIframeRecursive(resolve,reject,retryCount + 1)},waitTime)
+								}else{
+									resolve(iframe)
+								}
+
+							}
+							function getIframe(){
+								return new Promise((resolve,reject)=>(getIframeRecursive(resolve,reject)))
+							}
+							getIframe().then(iframe=>{
+								function receiveMessage(event) {
+									const data = event.data
+									console.log("data",data)
+									if (data.action == "resize") {
+
+										console.log(iframe)
+										console.log("Set height " + data.height)
+										iframe.style.height = data.height + 'px';
+									}
+								}
+								window.addEventListener("message", receiveMessage, false)
+							})
+
+
+					</script>
+			<?php
+		}
+
+
 	}
 
 	function create_post_type() {
@@ -45,7 +107,7 @@ class IoTCat_components {
 			'show_in_admin_bar'   => true,
 			'menu_position'       => 5,
 			'menu_icon'           => 'dashicons-list-view',
-			'capability_type'     => 'post',
+			'capability_type'     => 'page',
 			'hierarchical'        => false,
 			'supports'            => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
 			'has_archive'         => true,
@@ -160,12 +222,23 @@ class IoTCat_components {
 	}
 
 
-	public function get_page_content($name,$description, $image_url){
+	private function get_img_html($image_url){
+		if(isset($image_url)){
 			return "
-			<img src=\"$image_url\" style=\"height:200px\"/>
-			<p>$description</p>
+			<div class=\"iotcat-component-img-container\">
+				<img class=\"iotcat-component-img\" src=\"$image_url\" >
+			</div>
+			";
+		}
+		return "";
+	}
 
+	private function get_page_content($name,$description,$embedded_url, $image_url){
 
+			return
+			$this -> get_img_html($image_url).
+			"<p>$description</p>
+			<iframe id=\"iotcat-iframe\" style=\"height: 0px;width: 100%\" src=\"$embedded_url\" />
 			";
 
 
@@ -204,13 +277,13 @@ class IoTCat_components {
 		}
 	}
 
-	public function add_new($name,$description, $image_url, $original_id,$subscription_id, $insert_repeated = false){
+	public function add_new($name,$description,  $embedded_url,$image_url,$original_id,$subscription_id, $insert_repeated = false){
 
 		if($insert_repeated || !$this->has_component($original_id)){
 			$component = array(
 						'post_title'    => $name,
 						'post_status'   => 'publish',
-						'post_content' => $this->get_page_content($name,$description, $image_url),
+						'post_content' => $this->get_page_content($name,$description,$embedded_url, $image_url),
 						'post_type'     => $this->post_type,
 						'meta_input' => array(
 									"description" => $description,

@@ -1,5 +1,7 @@
 <?php
 
+
+
  /**
   * @internal never define functions inside callbacks.
   * these functions could be run multiple times; this would result in a fatal error.
@@ -8,10 +10,33 @@
  /**
   * custom option and settings
   */
+
+  function iotcat_options_handler($options)
+  {
+    global $iotcat_default_components_singular_name, $iotcat_default_components_plural_name;
+    if($_POST["submit"] === "Delete Subscription"){
+      unset($options["iotcat_field_token"]);
+    }
+
+    $component_singular = $iotcat_default_components_singular_name;
+    $component_plural = $iotcat_default_components_plural_name;
+
+    if(array_key_exists("iotcat_field_components_singular", $options) &&  $options["iotcat_field_components_singular"]){
+      $component_singular = $options["iotcat_field_components_singular"];
+    }
+
+    if(array_key_exists("iotcat_field_components_plural", $options) &&  $options["iotcat_field_components_plural"]){
+      $component_plural = $options["iotcat_field_components_plural"];
+    }
+
+    return array_merge($options,array("iotcat_field_components_singular"=>$component_singular ,"iotcat_field_components_plural"=>$component_plural ));
+
+   }
+
  function iotcat_settings_init() {
 
      // Register a new setting for "iotcat" page.
-     register_setting( 'iotcat', 'iotcat_options' );
+     register_setting( 'iotcat', 'iotcat_options','iotcat_options_handler' );
 
 
 
@@ -32,6 +57,32 @@
          'iotcat_section_developers',
          array(
              'label_for'         => 'iotcat_field_token',
+             'class'             => 'iotcat_row',
+             'iotcat_custom_data' => 'custom',
+         )
+     );
+     add_settings_field(
+         'iotcat_field_components_singular', // As of WP 4.6 this value is used only internally.
+                                 // Use $args' label_for to populate the id inside the callback.
+             __( 'Component singular name', 'iotcat' ),
+         'iotcat_field_components_singular_cb',
+         'iotcat',
+         'iotcat_section_developers',
+         array(
+             'label_for'         => 'iotcat_field_components_singular',
+             'class'             => 'iotcat_row',
+             'iotcat_custom_data' => 'custom',
+         )
+     );
+     add_settings_field(
+         'iotcat_field_components_plural', // As of WP 4.6 this value is used only internally.
+                                 // Use $args' label_for to populate the id inside the callback.
+             __( 'Component plural name', 'iotcat' ),
+         'iotcat_field_components_plural_cb',
+         'iotcat',
+         'iotcat_section_developers',
+         array(
+             'label_for'         => 'iotcat_field_components_plural',
              'class'             => 'iotcat_row',
              'iotcat_custom_data' => 'custom',
          )
@@ -72,11 +123,8 @@
   * @param array $args
   */
  function iotcat_field_token_cb( $args ) {
-
-
      // Get the value of the setting we've registered with register_setting()
      $options = get_option( 'iotcat_options' );
-
      ?>
      <input
   		name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
@@ -85,6 +133,38 @@
   	<p class="description">
   	<?php esc_html_e( 'Token to authenticate requests with.', 'iotcat' ); ?>
   	</p>
+
+     <?php
+ }
+
+
+ function iotcat_field_components_singular_cb( $args ) {
+     // Get the value of the setting we've registered with register_setting()
+     $options = get_option( 'iotcat_options' );
+     ?>
+     <input
+  		name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+  		value="<?php echo $options[ $args['label_for'] ] ?? "Component"; ?>"
+  	/>
+  	<p class="description">
+  	   <?php esc_html_e( 'Singular name for component post type.', 'iotcat' ); ?>
+  	</p>
+
+     <?php
+ }
+
+
+ function iotcat_field_components_plural_cb( $args ) {
+     // Get the value of the setting we've registered with register_setting()
+     $options = get_option( 'iotcat_options' );
+     ?>
+     <input
+     name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+     value="<?php echo $options[ $args['label_for'] ] ?? "Components"; ?>"
+   />
+   <p class="description">
+     <?php esc_html_e( 'Plural name for component post type.', 'iotcat' ); ?>
+   </p>
 
      <?php
  }
@@ -140,10 +220,33 @@
              // (sections are registered for "iotcat", each field is registered to a specific section)
              do_settings_sections( 'iotcat' );
              // output save settings button
-             submit_button( 'Save Settings' );
+             submit_button( 'Save Settings','primary iotcat-save-button','submit',false );
+              submit_button( 'Delete Subscription', 'secondary');
              ?>
+
          </form>
+
      </div>
      <?php
  }
+ function load_resources() {
+  /* wp_register_style( 'akismet.css', plugin_dir_url( __FILE__ ) . '_inc/akismet.css', array(), AKISMET_VERSION );
+   wp_enqueue_style( 'akismet.css');
+
+   wp_register_script( 'akismet.js', plugin_dir_url( __FILE__ ) . '_inc/akismet.js', array('jquery'), AKISMET_VERSION );
+   wp_enqueue_script( 'akismet.js' );*/
+   log_me("load_resources");
+   wp_register_style( 'styles.css', plugin_dir_url( __FILE__ ) . 'css/styles.css', array(), "1.0" );
+   wp_enqueue_style( 'styles.css');
+
+   wp_register_script( 'main.js', plugin_dir_url( __FILE__ ) . 'js/main.js', array('jquery'), "1.0" );
+   wp_enqueue_script( 'main.js' );
+  /* wp_enqueue_style( 'css',  __DIR__ . '/css/styles.cssz', array(), '1.0' );
+   wp_enqueue_script( 'js',  __DIR__ . '/js/main.jxs', array(), '1.0' );*/
+
+ }
+add_action( 'admin_enqueue_scripts', 'load_resources' );
+
+
+
 ?>
