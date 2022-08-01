@@ -1,15 +1,16 @@
 <?php
 require_once  __DIR__ . '/log.php';
 require_once  __DIR__ . '/iotcat_elements.php';
-class IoTCat_components  extends IoTCat_elements{
+class IoTCat_validations  extends IoTCat_elements {
 
-	function __construct($name = "Components", $singular_name = "Component", $post_type = "iotcat_component") {
+	function __construct($name = "Validations", $singular_name = "validation", $post_type = "iotcat_validation") {
 		parent::__construct($name, $singular_name, $post_type );
 
 		add_action('init',array($this,'create_taxonomies'));
 
-		add_action('manage_iotcat_component_posts_columns',array($this,'columns'),10,2);
-		add_action('manage_iotcat_component_posts_custom_column',array($this,'column_data'),11,2);
+		add_action('manage_iotcat_validation_posts_columns',array($this,'columns'),10,2);
+		add_action('manage_iotcat_validation_posts_custom_column',array($this,'column_data'),11,2);
+		$this->icon = "dashicons-lightbulb";
 
 		//sanitize_title("fdsdf sDGF DFgdf g-sdfg sdfg sdfg~dfsg sdf");
 
@@ -18,8 +19,8 @@ class IoTCat_components  extends IoTCat_elements{
 		//add_filter('posts_orderby',array($this,'set_default_sort'),20,2);
 	}
 
-public static $pageName = "components";
 
+	public static $pageName = "validations";
 
 	function create_taxonomies() {
 		// Add a taxonomy like categories
@@ -44,7 +45,7 @@ public static $pageName = "components";
 			'query_var'         => true,
 			'rewrite'           => array( 'slug' => 'type' ),
 		);
-		register_taxonomy('iotcat_component_type',array($this->post_type),$args);
+		register_taxonomy('iotcat_validation_type',array($this->post_type),$args);
 		// Add a taxonomy like tags
 		$labels = array(
 			'name'                       => 'Attributes',
@@ -73,18 +74,18 @@ public static $pageName = "components";
 			'query_var'             => true,
 			'rewrite'               => array( 'slug' => 'attribute' ),
 		);
-		register_taxonomy('iotcat_component_attribute',$this->post_type,$args);
+		register_taxonomy('iotcat_validation_attribute',$this->post_type,$args);
 	}
 
 	function columns($columns) {
 		unset($columns['date']);
-		unset($columns['taxonomy-iotcat_component_attribute']);
+		unset($columns['taxonomy-iotcat_validation_attribute']);
 		unset($columns['comments']);
 		unset($columns['author']);
 		return array_merge(
 			$columns,
 			array(
-				'iotcat_component_original_id' => 'Original Id',
+				'iotcat_validation_original_id' => 'Original Id',
 				'iotcat_subscription_id' => 'Subscription Id',
 				'iotcat_timeframe' => 'Timeframe'
 			));
@@ -92,7 +93,7 @@ public static $pageName = "components";
 
 	function column_data($column,$post_id) {
 		switch($column) {
-			case 'iotcat_component_original_id' :
+			case 'iotcat_validation_original_id' :
 				echo get_post_meta($post_id,'original_id',1);
 				break;
 			case 'iotcat_subscription_id' :

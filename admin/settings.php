@@ -13,7 +13,7 @@
 
   function iotcat_options_handler($options)
   {
-    global $iotcat_default_components_singular_name, $iotcat_default_components_plural_name;
+    global $iotcat_default_components_singular_name, $iotcat_default_components_plural_name,$iotcat_default_validations_plural_name,$iotcat_default_validations_singular_name;
     if($_POST["submit"] === "Delete Subscription"){
       unset($options["iotcat_field_token"]);
     }
@@ -29,7 +29,26 @@
       $component_plural = $options["iotcat_field_components_plural"];
     }
 
-    return array_merge($options,array("iotcat_field_components_singular"=>$component_singular ,"iotcat_field_components_plural"=>$component_plural ));
+    $validation_singular = $iotcat_default_validations_singular_name;
+    $validation_plural = $iotcat_default_validations_plural_name;
+
+    if(array_key_exists("iotcat_field_validations_singular", $options) &&  $options["iotcat_field_validations_singular"]){
+      $validation_singular = $options["iotcat_field_validations_singular"];
+    }
+
+    if(array_key_exists("iotcat_field_validations_plural", $options) &&  $options["iotcat_field_validations_plural"]){
+      $validation_plural = $options["iotcat_field_validations_plural"];
+    }
+
+    return array_merge(
+        $options
+        ,array(
+          "iotcat_field_components_singular"=>$component_singular ,
+          "iotcat_field_components_plural"=>$component_plural,
+          "iotcat_field_validations_singular"=>$validation_singular ,
+          "iotcat_field_validations_plural"=>$validation_plural
+        )
+      );
 
    }
 
@@ -87,6 +106,32 @@
              'iotcat_custom_data' => 'custom',
          )
      );
+     add_settings_field(
+         'iotcat_field_validations_singular', // As of WP 4.6 this value is used only internally.
+                                 // Use $args' label_for to populate the id inside the callback.
+             __( 'Validation singular name', 'iotcat' ),
+         'iotcat_field_validations_singular_cb',
+         'iotcat',
+         'iotcat_section_developers',
+         array(
+             'label_for'         => 'iotcat_field_validations_singular',
+             'class'             => 'iotcat_row',
+             'iotcat_custom_data' => 'custom',
+         )
+     );
+     add_settings_field(
+         'iotcat_field_validations_plural', // As of WP 4.6 this value is used only internally.
+                                 // Use $args' label_for to populate the id inside the callback.
+             __( 'Validation plural name', 'iotcat' ),
+         'iotcat_field_validations_plural_cb',
+         'iotcat',
+         'iotcat_section_developers',
+         array(
+             'label_for'         => 'iotcat_field_validations_plural',
+             'class'             => 'iotcat_row',
+             'iotcat_custom_data' => 'custom',
+         )
+     );
  }
 
  /**
@@ -139,12 +184,13 @@
 
 
  function iotcat_field_components_singular_cb( $args ) {
+   global $iotcat_default_components_singular_name;
      // Get the value of the setting we've registered with register_setting()
      $options = get_option( 'iotcat_options' );
      ?>
      <input
   		name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-  		value="<?php echo $options[ $args['label_for'] ] ?? "Component"; ?>"
+  		value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_components_singular_name; ?>"
   	/>
   	<p class="description">
   	   <?php esc_html_e( 'Singular name for component post type.', 'iotcat' ); ?>
@@ -155,12 +201,13 @@
 
 
  function iotcat_field_components_plural_cb( $args ) {
+   global $iotcat_default_components_plural_name;
      // Get the value of the setting we've registered with register_setting()
      $options = get_option( 'iotcat_options' );
      ?>
      <input
      name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-     value="<?php echo $options[ $args['label_for'] ] ?? "Components"; ?>"
+     value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_components_plural_name; ?>"
    />
    <p class="description">
      <?php esc_html_e( 'Plural name for component post type.', 'iotcat' ); ?>
@@ -168,6 +215,42 @@
 
      <?php
  }
+
+
+ function iotcat_field_validations_singular_cb( $args ) {
+   global $iotcat_default_validations_singular_name;
+     // Get the value of the setting we've registered with register_setting()
+     $options = get_option( 'iotcat_options' );
+     ?>
+     <input
+  		name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+  		value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_validations_singular_name; ?>"
+  	/>
+  	<p class="description">
+  	   <?php esc_html_e( 'Singular name for validation post type.', 'iotcat' ); ?>
+  	</p>
+
+     <?php
+ }
+
+
+ function iotcat_field_validations_plural_cb( $args ) {
+   global $iotcat_default_validations_plural_name;
+
+     // Get the value of the setting we've registered with register_setting()
+     $options = get_option( 'iotcat_options' );
+     ?>
+     <input
+     name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+     value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_validations_plural_name; ?>"
+   />
+   <p class="description">
+     <?php esc_html_e( 'Plural name for validation post type.', 'iotcat' ); ?>
+   </p>
+
+     <?php
+ }
+
 
  /**
   * Add the top level menu page.
@@ -235,7 +318,7 @@
 
    wp_register_script( 'akismet.js', plugin_dir_url( __FILE__ ) . '_inc/akismet.js', array('jquery'), AKISMET_VERSION );
    wp_enqueue_script( 'akismet.js' );*/
-   log_me("load_resources");
+
    wp_register_style( 'styles.css', plugin_dir_url( __FILE__ ) . 'css/styles.css', array(), "1.0" );
    wp_enqueue_style( 'styles.css');
 
