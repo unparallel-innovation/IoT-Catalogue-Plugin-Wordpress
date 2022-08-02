@@ -10,9 +10,19 @@ class IoTCat_elements {
 		add_action('init',array($this,'create_post_type'));
 		add_action('wp_head', array($this,'add_page_header'));
 		add_action('template_redirect', array($this,'process_redirect'),10,0);
+		add_action('pre_get_posts', array($this,'sort_posts'),10,1);
 		$this->icon = 'dashicons-list-view';
 	}
 
+	public function sort_posts($query){
+		if(
+			array_key_exists("post_type",$query->query) &&
+			$query->query["post_type"] === $this->post_type
+		){
+			$query->set( 'order', 'ASC' );
+			$query->set( 'orderby', 'title' );
+		}
+	}
 
 	public function process_redirect(){
 		global $wp;
@@ -192,7 +202,7 @@ class IoTCat_elements {
 		$posts = $this-> get_subscription_elements($subscription_id);
 		foreach ($posts as $post) {
 			$id = $post->ID;
-			log_me("Deleting post with id ".$id);
+			iotcat_log_me("Deleting post with id ".$id);
 			wp_delete_post($id);
 		}
 	}

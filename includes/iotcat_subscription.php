@@ -36,9 +36,9 @@
 			if($ids){
 				foreach ($ids as $id) {
 						if($instance->has_element($id)){
-								log_me("Element ".$id." exists");
+								iotcat_log_me("Element ".$id." exists");
 						}else{
-							log_me("Element ".$id." does not exists");
+							iotcat_log_me("Element ".$id." does not exists");
 							$component = $this->get_tpi_element($instance::$pageName,$id);
 							if(array_key_exists("name",$component)){
 								$instance->add_new(

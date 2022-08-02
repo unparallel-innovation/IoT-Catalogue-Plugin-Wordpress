@@ -176,7 +176,7 @@
   		value="<?php echo $options[ $args['label_for'] ] ?? ""; ?>"
   	/>
   	<p class="description">
-  	<?php esc_html_e( 'Token to authenticate requests with.', 'iotcat' ); ?>
+  	<?php esc_html_e( 'Token used to authenticate requests with.', 'iotcat' ); ?>
   	</p>
 
      <?php
