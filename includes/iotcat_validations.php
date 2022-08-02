@@ -12,11 +12,6 @@ class IoTCat_validations  extends IoTCat_elements {
 		add_action('manage_iotcat_validation_posts_custom_column',array($this,'column_data'),11,2);
 		$this->icon = "dashicons-lightbulb";
 
-		//sanitize_title("fdsdf sDGF DFgdf g-sdfg sdfg sdfg~dfsg sdf");
-
-	//	$this->post_type = $post_type;
-	//	add_filter('posts_join',array($this,'join'),10,1);
-		//add_filter('posts_orderby',array($this,'set_default_sort'),20,2);
 	}
 
 

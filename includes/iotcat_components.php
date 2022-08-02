@@ -11,18 +11,13 @@ class IoTCat_components  extends IoTCat_elements{
 		add_action('manage_iotcat_component_posts_columns',array($this,'columns'),10,2);
 		add_action('manage_iotcat_component_posts_custom_column',array($this,'column_data'),11,2);
 
-		//sanitize_title("fdsdf sDGF DFgdf g-sdfg sdfg sdfg~dfsg sdf");
 
-	//	$this->post_type = $post_type;
-	//	add_filter('posts_join',array($this,'join'),10,1);
-		//add_filter('posts_orderby',array($this,'set_default_sort'),20,2);
 	}
 
 public static $pageName = "components";
 
 
 	function create_taxonomies() {
-		// Add a taxonomy like categories
 		$labels = array(
 			'name'              => 'Types',
 			'singular_name'     => 'Type',
@@ -45,7 +40,7 @@ public static $pageName = "components";
 			'rewrite'           => array( 'slug' => 'type' ),
 		);
 		register_taxonomy('iotcat_component_type',array($this->post_type),$args);
-		// Add a taxonomy like tags
+
 		$labels = array(
 			'name'                       => 'Attributes',
 			'singular_name'              => 'Attribute',

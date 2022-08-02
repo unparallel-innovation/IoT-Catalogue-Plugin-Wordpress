@@ -79,8 +79,6 @@ function iotcat_updated_option($option, $old_value,$value){
 
 }
 
-
-//https://developer.wordpress.org/reference/hooks/update_option/
 add_action( 'updated_option', 'iotcat_updated_option', 10, 3 );
 add_action( 'added_option', 'iotcat_added_option', 10, 2 );
 
@@ -90,13 +88,11 @@ function iotcat_activate() {
   if($current_subscription){
     iotcat_sync_data($current_subscription);
   }
-  /* activation code here */
+
 }
 register_activation_hook( __FILE__, 'iotcat_activate' );
 function iotcat_deactivate() {
 
-  //iotcat_destroy_current_subscription();
-  /* activation code here */
 }
 register_deactivation_hook( __FILE__, 'iotcat_deactivate' );
 
