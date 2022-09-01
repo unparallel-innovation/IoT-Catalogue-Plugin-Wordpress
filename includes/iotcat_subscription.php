@@ -1,15 +1,19 @@
 <?php
 	require_once  __DIR__ . '/log.php';
   require_once  __DIR__ . '/iotcat_components.php';
+
+
 	class IoTCat_subscription {
-		function __construct($token, $iotcat_components ,$iotcat_validations,$base_url ){
+		function __construct($token, $iotcat_elements_instances,$base_url ){
 
 			$this->token = $token;
 			$this->base_url = $base_url;
-			$this->iotcat_components = $iotcat_components;
-			$this->iotcat_validations = $iotcat_validations;
+			$this->iotcat_elements_instances = $iotcat_elements_instances;
 			$this->id = uniqid();
+
+
 		}
+
 
 
 		private function get_tpi_ids($pageName){
@@ -58,14 +62,19 @@
 		}
 
 		public function sync_data(){
-			$this->sync_page_data($this->iotcat_components);
-			$this->sync_page_data($this->iotcat_validations);
+
+			foreach($this->iotcat_elements_instances as $iotcat_elements_instance){
+				$this->sync_page_data($iotcat_elements_instance);
+			}
 
 		}
 		public function destroy(){
-			$this->iotcat_components->delete_subscription_elements($this->id);
-			$this->iotcat_validations->delete_subscription_elements($this->id);
+			foreach($this->iotcat_elements_instances as $iotcat_elements_instance){
+				$iotcat_elements_instance->delete_subscription_elements($this->id);
+			}
 		}
+
+
 
 	}
 

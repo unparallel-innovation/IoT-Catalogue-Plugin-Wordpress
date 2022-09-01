@@ -52,7 +52,7 @@ function iotcat_added_option($option, $value){
     if(array_key_exists("iotcat_field_token", $value)){
       $token = $value["iotcat_field_token"];
       if($token){
-        $iotcat_subscription = new IoTCat_subscription($token,$iotcat_components,$iotcat_validations,$iotcat_base_url);
+        $iotcat_subscription = new IoTCat_subscription($token,array($iotcat_components,$iotcat_validations),$iotcat_base_url);
         update_option( 'iotcat_subscription_instance', $iotcat_subscription);
         iotcat_sync_data($iotcat_subscription);
       }
@@ -86,7 +86,7 @@ function iotcat_updated_option($option, $old_value,$value){
       $token = $value["iotcat_field_token"];
       if($token){
         global $iotcat_components,$iotcat_validations;
-        $iotcat_subscription = new IoTCat_subscription($token,$iotcat_components,$iotcat_validations,$iotcat_base_url);
+        $iotcat_subscription = new IoTCat_subscription($token,array($iotcat_components,$iotcat_validations),$iotcat_base_url);
         update_option( 'iotcat_subscription_instance', $iotcat_subscription);
         iotcat_sync_data($iotcat_subscription);
       }

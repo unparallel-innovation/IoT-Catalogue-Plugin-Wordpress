@@ -13,9 +13,16 @@
 
   function iotcat_options_handler($options)
   {
-    global $iotcat_default_components_singular_name, $iotcat_default_components_plural_name,$iotcat_default_validations_plural_name,$iotcat_default_validations_singular_name;
+    global $iotcat_default_components_singular_name, $iotcat_default_components_plural_name,$iotcat_default_validations_plural_name,$iotcat_default_validations_singular_name,$iotcat_default_data_update_interval;
     if($_POST["submit"] === "Delete Subscription"){
       unset($options["iotcat_field_token"]);
+    }
+
+
+    $data_update_interval = $iotcat_default_data_update_interval;
+
+    if(array_key_exists("iotcat_field_data_update_interval", $options) &&  $options["iotcat_field_data_update_interval"]){
+      $data_update_interval = $options["iotcat_field_data_update_interval"];
     }
 
     $component_singular = $iotcat_default_components_singular_name;
@@ -43,6 +50,7 @@
     return array_merge(
         $options
         ,array(
+          "iotcat_field_data_update_interval"=>$data_update_interval,
           "iotcat_field_components_singular"=>$component_singular ,
           "iotcat_field_components_plural"=>$component_plural,
           "iotcat_field_validations_singular"=>$validation_singular ,
@@ -66,6 +74,8 @@
          'iotcat'
      );
 
+
+
      // Register a new field in the "iotcat_section_developers" section, inside the "iotcat" page.
      add_settings_field(
          'iotcat_field_token', // As of WP 4.6 this value is used only internally.
@@ -80,6 +90,22 @@
              'iotcat_custom_data' => 'custom',
          )
      );
+
+
+     add_settings_field(
+         'iotcat_field_data_update_interval', // As of WP 4.6 this value is used only internally.
+                                 // Use $args' label_for to populate the id inside the callback.
+             __( 'Data update interval (h)', 'iotcat' ),
+         'iotcat_field_data_update_interval_cb',
+         'iotcat',
+         'iotcat_section_developers',
+         array(
+             'label_for'         => 'iotcat_field_data_update_interval',
+             'class'             => 'iotcat_row',
+             'iotcat_custom_data' => 'custom',
+         )
+     );
+
      add_settings_field(
          'iotcat_field_components_singular', // As of WP 4.6 this value is used only internally.
                                  // Use $args' label_for to populate the id inside the callback.
@@ -181,6 +207,23 @@
 
      <?php
  }
+
+ function iotcat_field_data_update_interval_cb( $args ) {
+     // Get the value of the setting we've registered with register_setting()
+     global $iotcat_default_data_update_interval;
+     $options = get_option( 'iotcat_options' );
+     ?>
+     <input
+  		name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+  		value="<?php echo $options[ $args['label_for'] ] ?? $iotcat_default_data_update_interval; ?>"
+  	/>
+  	<p class="description">
+  	<?php esc_html_e( 'Period in hours between data updates.', 'iotcat' ); ?>
+  	</p>
+
+     <?php
+ }
+
 
 
  function iotcat_field_components_singular_cb( $args ) {

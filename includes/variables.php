@@ -1,4 +1,7 @@
 <?php
+
+	$iotcat_default_data_update_interval = "24";
+
 	$iotcat_default_components_singular_name = "Component";
 	$iotcat_default_components_plural_name = "Components";
 
