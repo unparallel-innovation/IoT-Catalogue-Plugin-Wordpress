@@ -15,7 +15,7 @@ class IoTCat_validations  extends IoTCat_elements {
 	}
 
 
-	public static $pageName = "validations";
+	public static $page_name = "validations";
 
 	function create_taxonomies() {
 		// Add a taxonomy like categories

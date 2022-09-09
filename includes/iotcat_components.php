@@ -14,7 +14,7 @@ class IoTCat_components  extends IoTCat_elements{
 
 	}
 
-public static $pageName = "components";
+	public static $page_name = "components";
 
 
 	function create_taxonomies() {

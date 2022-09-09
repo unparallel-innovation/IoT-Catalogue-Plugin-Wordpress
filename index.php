@@ -36,6 +36,7 @@
 
 $iotcat_base_url = "https://www.iot-catalogue.com";
 
+$iotcat_field_data_update_interval =  get_option( 'iotcat_options' )["iotcat_field_data_update_interval"] ??$iotcat_default_data_update_interval;
 
 $iotcat_components_singular_name =  get_option( 'iotcat_options' )["iotcat_field_components_singular"] ??$iotcat_default_components_singular_name;
 $iotcat_components_plural_name =  get_option( 'iotcat_options' )["iotcat_field_components_plural"] ??$iotcat_default_components_plural_name;
@@ -62,7 +63,7 @@ function iotcat_added_option($option, $value){
 }
 
 function iotcat_sync_data($iotcat_subscription){
-  $iotcat_subscription -> sync_data();
+  $iotcat_subscription -> get_data();
 
 
 }
@@ -99,6 +100,33 @@ function iotcat_updated_option($option, $old_value,$value){
 add_action( 'updated_option', 'iotcat_updated_option', 10, 3 );
 add_action( 'added_option', 'iotcat_added_option', 10, 2 );
 
+add_filter( 'cron_schedules', 'iotcat_add_update_interval' );
+function iotcat_add_update_interval($schedules){
+  global $iotcat_field_data_update_interval;
+  $schedules['iotcat_update_interval'] = array(
+        'interval' => intval($iotcat_field_data_update_interval)*3600,
+        'display'  => esc_html__( "Every .$iotcat_field_data_update_interval hours" ), );
+    return $schedules;
+
+}
+
+
+function iotcat_update_data_exec(){
+  $current_subscription = get_option('iotcat_subscription_instance');
+  if($current_subscription){
+    $current_subscription->get_data();
+  }
+}
+
+add_action( 'iotcat_update_data', 'iotcat_update_data_exec', 10, 0 );
+
+if ( ! wp_next_scheduled( 'iotcat_update_data' ) ) {
+
+  $current_time = time() + 10;
+  wp_schedule_event($current_time, 'iotcat_update_interval', 'iotcat_update_data' , array(), true);
+}
+
+
 function iotcat_activate() {
 
   $current_subscription = get_option('iotcat_subscription_instance');
@@ -108,7 +136,12 @@ function iotcat_activate() {
 
 }
 register_activation_hook( __FILE__, 'iotcat_activate' );
+
+
 function iotcat_deactivate() {
+  remove_filter( 'cron_schedules', 'iotcat_add_update_interval' );
+  $timestamp = wp_next_scheduled( 'iotcat_update_data' );
+    wp_unschedule_event( $timestamp, 'iotcat_update_data' );
 
 }
 register_deactivation_hook( __FILE__, 'iotcat_deactivate' );
