@@ -2,8 +2,8 @@
 
 /**
  * Plugin Name:       IoT Catalogue Integration
- * Description:       Display in wordpress content from IoT Catalogue
- * Version:           1.0.0
+ * Description:       Display in WordPress content from IoT Catalogue
+ * Version:           1.1.0
  * Author:            UNPARALLEL Innovation, Lda
  * Author URI:        https://www.unparallel.pt
  */

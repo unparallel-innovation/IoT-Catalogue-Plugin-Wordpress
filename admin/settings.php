@@ -21,7 +21,11 @@
 
     $data_update_interval = $iotcat_default_data_update_interval;
 
-    if(array_key_exists("iotcat_field_data_update_interval", $options) &&  $options["iotcat_field_data_update_interval"]){
+    if(
+            array_key_exists("iotcat_field_data_update_interval", $options) &&
+            $options["iotcat_field_data_update_interval"] &&
+            (string)(int)$options["iotcat_field_data_update_interval"] == $options["iotcat_field_data_update_interval"]
+    ){
       $data_update_interval = $options["iotcat_field_data_update_interval"];
     }
 
@@ -46,7 +50,6 @@
     if(array_key_exists("iotcat_field_validations_plural", $options) &&  $options["iotcat_field_validations_plural"]){
       $validation_plural = $options["iotcat_field_validations_plural"];
     }
-
     return array_merge(
         $options
         ,array(
