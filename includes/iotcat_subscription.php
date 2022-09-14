@@ -16,8 +16,11 @@
 
 		private function get_tpi_elements_id($page_name){
 			$response = wp_remote_get( $this->base_url.'/api/getTPIElementsId?access_token='.$this->token.'&pageName='.$page_name);
-			$response_code = $response["response"]["code"];
-			if($response_code === 200){
+			if(
+				array_key_exists("response", $response) &&
+				array_key_exists("code", $response["response"]) &&
+				$response["response"]["code"] === 200
+			){
 				return json_decode( wp_remote_retrieve_body( $response ), true );
 
 			}
@@ -25,8 +28,11 @@
 		private function get_tpi_element($page_name, $id){
 
 			$response = wp_remote_get( $this->base_url.'/api/getTPIElement?access_token='.$this->token.'&pageName='.$page_name.'&id='.$id);
-			$response_code = $response["response"]["code"];
-			if($response_code === 200){
+			if(
+				array_key_exists("response", $response) &&
+				array_key_exists("code", $response["response"]) &&
+				$response["response"]["code"] === 200
+			){
 				return json_decode( wp_remote_retrieve_body( $response ), true );
 
 			}
