@@ -67,8 +67,10 @@
 									$instance->update_element($post->ID,
 										array_key_exists("name", $element) ?$element["name"]:"",
 										array_key_exists("description", $element) ?$element["description"]:"",
+										array_key_exists("_website", $element) ?$element["_website"]:"",
 										array_key_exists("_embeddedUrl", $element) ?$element["_embeddedUrl"]:"",
 										array_key_exists("_imageUrl", $element) ?$element["_imageUrl"]:"",
+										array_key_exists("_tagsPath", $element) ?$element["_tagsPath"]:null,
 										array_key_exists("_id", $element) ?$element["_id"]:"",
 										array_key_exists("_lastUpdateTimestamp", $element) ? round( $element["_lastUpdateTimestamp"]/1000):0,
 										$this->id
@@ -83,8 +85,10 @@
 								$instance->add_new_element(
 											array_key_exists("name", $element) ?$element["name"]:"",
 											array_key_exists("description", $element) ?$element["description"]:"",
+											array_key_exists("_website", $element) ?$element["_website"]:"",
 											array_key_exists("_embeddedUrl", $element) ?$element["_embeddedUrl"]:"",
 											array_key_exists("_imageUrl", $element) ?$element["_imageUrl"]:"",
+											array_key_exists("_tagsPath", $element) ?$element["_tagsPath"]:null,
 											array_key_exists("_id", $element) ?$element["_id"]:"",
 											array_key_exists("_lastUpdateTimestamp", $element) ? round( $element["_lastUpdateTimestamp"]/1000):0,
 											$this->id

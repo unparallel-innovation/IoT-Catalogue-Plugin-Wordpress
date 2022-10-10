@@ -98,12 +98,68 @@ class IoTCat_elements {
 		return "";
 	}
 
-	protected function get_page_content($name,$description,$embedded_url, $image_url){
+	private function get_website_link($website){
+
+		if(isset($website) && $website !== ""){
+
+			$parse = parse_url($website);
+			$host = $parse['host'];
+			return "
+			<div class=\"iotcat-element-info-box\">
+				<b class=\"label\">Website</b><a href=\"$website\" target=\"_blank\">$host</a>
+			</div>
+			";
+		}
+		return "";
+	}
+
+
+	private function get_tags_elements($tags_path){
+		$html = "";
+		if(isset($tags_path) && $tags_path !== null){
+			$tag_elements = array();
+			foreach($tags_path as $tag_path){
+				if(count($tag_path)>0){
+					$tag_name = $tag_path[0]["name"];
+					$tag_type_name = $tag_path[0]["typeName"];
+					if(!array_key_exists($tag_type_name,$tag_elements)){
+						$tag_elements[$tag_type_name] = array();
+					}
+					array_push($tag_elements[$tag_type_name],$tag_name);
+
+				}
+
+			}
+			$tag_type_names = array_keys($tag_elements);
+			asort($tag_type_names);
+			foreach($tag_type_names as $tag_type_name){
+				$tags_html = "";
+				$tag_names = $tag_elements[$tag_type_name];
+				asort($tag_names);
+				foreach($tag_names as $tag_name){
+					$tags_html = $tags_html."<span class=\"iotcat-element-tag\">$tag_name</span>";
+				}
+				if($tags_html !== ""){
+					$html = $html."
+					<div class=\"iotcat-element-info-box\">
+						<b class=\"label\">$tag_type_name</b>$tags_html
+					</div>
+					";
+				}
+			}
+		}
+		return $html;
+	}
+
+
+	protected function get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path){
 
 			return
-			self::get_img_html($image_url).
-			"<p>$description</p>
-			<iframe id=\"iotcat-iframe\" style=\"height: 0px;width: 100%\" src=\"$embedded_url\" />
+			$this->get_img_html($image_url).
+			"<p>$description</p>".
+			$this->get_tags_elements($tags_path).
+			$this->get_website_link($website).
+			"<iframe id=\"iotcat-iframe\" style=\"height: 0px;width: 100%\" src=\"$embedded_url\" />
 			";
 
 
@@ -129,6 +185,23 @@ class IoTCat_elements {
 										justify-content: center;
 										margin-bottom: 10px;
 
+									}
+									.iotcat-element-info-box {
+									    background-color: #f1f2f2;
+									    padding: 8px;
+									    border-radius: 4px;
+											margin-bottom: 8px;
+									}
+									.iotcat-element-info-box .label {
+										margin-right:5px;
+									}
+
+									.iotcat-element-tag {
+								    border: 1px solid #cdced0;
+								    color: #494949;
+								    padding: 2px 5px;
+								    margin-right: 5px;
+								    border-radius: 2px;
 									}
 							</style>
 							<script>
@@ -232,11 +305,11 @@ class IoTCat_elements {
 	}
 
 
-	private function create_post_element($id,	$name, $description, $embedded_url, $image_url,$original_id,$subscription_id,$last_update_timestamp){
+	private function create_post_element($id,	$name, $description,$website, $embedded_url, $image_url,$tags_path,$original_id,$subscription_id,$last_update_timestamp){
 		$element = array(
 					'post_title'    => $name,
 					'post_status'   => 'publish',
-					'post_content' => $this->get_page_content($name,$description,$embedded_url, $image_url),
+					'post_content' => $this->get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path),
 					'post_type'     => $this->post_type,
 					'meta_input' => array(
 								"description" => $description,
@@ -252,17 +325,18 @@ class IoTCat_elements {
 			}
 			return $element;
 	}
-	public function add_new_element($name,$description,  $embedded_url,$image_url,$original_id,$last_update_timestamp,$subscription_id, $insert_repeated = false){
+	public function add_new_element($name,$description, $website, $embedded_url,$image_url,$tags_path,$original_id,$last_update_timestamp,$subscription_id, $insert_repeated = false){
 
 		if($insert_repeated || !$this->has_element($original_id)){
             iotcat_log_me("Add new $this->post_type $name");
-            return wp_insert_post( $this->create_post_element(null, $name,$description,$embedded_url,$image_url,$original_id,$subscription_id,  $last_update_timestamp ) );
+            return wp_insert_post( $this->create_post_element(null, $name,$description,$website,$embedded_url,$image_url,$tags_path,$original_id,$subscription_id,  $last_update_timestamp ) );
 		}
 	}
 
-	public function update_element($id,$name,$description,  $embedded_url,$image_url,$original_id,$last_update_timestamp,$subscription_id){
-        iotcat_log_me("update $this->post_type $name");
-		return wp_update_post( $this->create_post_element($id, $name,$description,$embedded_url,$image_url,$original_id,$subscription_id,  $last_update_timestamp ) );
+	public function update_element($id,$name,$description,$website,  $embedded_url,$image_url,$tags_path,$original_id,$last_update_timestamp,$subscription_id){
+
+    iotcat_log_me("update $this->post_type $name");
+		return wp_update_post( $this->create_post_element($id, $name,$description,$website,$embedded_url,$image_url,$tags_path,$original_id,$subscription_id,  $last_update_timestamp ) );
 	}
 
 }

@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       IoT Catalogue Integration
  * Description:       Display in WordPress content from IoT Catalogue
- * Version:           1.1.2
+ * Version:           1.2.0
  * Author:            UNPARALLEL Innovation, Lda
  * Author URI:        https://www.unparallel.pt
  */
@@ -35,6 +35,7 @@
   require_once  __DIR__ . '/includes/iotcat_validations.php';
 
 $iotcat_base_url = "https://www.iot-catalogue.com";
+
 
 $iotcat_field_data_update_interval =  get_option( 'iotcat_options' )["iotcat_field_data_update_interval"] ??$iotcat_default_data_update_interval;
 
