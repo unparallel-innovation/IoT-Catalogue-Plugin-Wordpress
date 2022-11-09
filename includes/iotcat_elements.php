@@ -66,6 +66,7 @@ class IoTCat_elements {
 
 		$args = array(
 			'labels'              => $labels,
+			'taxonomies' 					=> array('post_tag'),
 			'public'              => true,
 			'exclude_from_search' => false,
 			'publicly_queryable'  => true,
@@ -113,6 +114,19 @@ class IoTCat_elements {
 		return "";
 	}
 
+
+	private function get_tags_input($tags_path){
+		$tag_input = array();
+		if(isset($tags_path) && $tags_path !== null){
+			foreach($tags_path as $tag_path){
+				if(count($tag_path)>0){
+					$tag_name = $tag_path[0]["name"];
+					array_push($tag_input,$tag_name);
+				}
+			}
+		}
+		return $tag_input;
+	}
 
 	private function get_tags_elements($tags_path){
 		$html = "";
@@ -306,10 +320,13 @@ class IoTCat_elements {
 
 
 	private function create_post_element($id,	$name, $description,$website, $embedded_url, $image_url,$tags_path,$original_id,$subscription_id,$last_update_timestamp){
+
+
 		$element = array(
 					'post_title'    => $name,
 					'post_status'   => 'publish',
 					'post_content' => $this->get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path),
+					'tags_input' => $this->get_tags_input($tags_path),
 					'post_type'     => $this->post_type,
 					'meta_input' => array(
 								"description" => $description,
