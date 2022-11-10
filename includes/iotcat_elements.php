@@ -142,7 +142,7 @@ class IoTCat_elements {
 
 	private function get_tags_elements($tags_path){
 
-		return "<div class=\"iotcat-tags-container-new\"><!-- wp:post-terms {\"term\":\"post_tag\",\"textAlign\":\"center\",\"separator\":\"  \",\"style\":{\"typography\":{\"fontStyle\":\"normal\",\"fontWeight\":\"200\"}},\"fontSize\":\"medium\"} /--></div>";
+		return "<div class=\"iotcat-tags-container-new mt-4\"><!-- wp:post-terms {\"term\":\"post_tag\",\"textAlign\":\"center\",\"separator\":\"  \",\"style\":{\"typography\":{\"fontStyle\":\"normal\",\"fontWeight\":\"200\"}},\"fontSize\":\"medium\"} /--></div>";
 		$html = "";
 		if(isset($tags_path) && $tags_path !== null){
 			$tag_elements = array();
