@@ -101,9 +101,11 @@ class IoTCat_elements {
 
 		if(isset($image_url) && $image_url !== ""){
 			return "
+			<!-- wp:html -->
 			<div class=\"iotcat-element-img-container\">
 				<img class=\"iotcat-element-img\" src=\"$image_url\" >
 			</div>
+			<!-- /wp:html -->
 			";
 		}
 		return "";
@@ -117,7 +119,7 @@ class IoTCat_elements {
 			$host = $parse['host'];
 			return "
 			<div class=\"iotcat-element-info-box\">
-				<b class=\"label\">Website</b><a href=\"$website\" target=\"_blank\">$host</a>
+				<b class=\"label\">Website: </b><a href=\"$website\" target=\"_blank\">$host</a>
 			</div>
 			";
 		}
