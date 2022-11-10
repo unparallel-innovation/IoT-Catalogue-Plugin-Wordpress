@@ -2,16 +2,25 @@
 require_once  __DIR__ . '/log.php';
 class IoTCat_elements {
 
-	function __construct($name, $singular_name, $post_type) {
+	function __construct($name, $singular_name, $post_type, $default_metadata = array(), $comment_type) {
 
 		$this->name = $name;
 		$this->singular_name = $singular_name;
 		$this->post_type = $post_type;
+		$this->default_metadata = $default_metadata;
+		$this->comment_type = $comment_type;
 		add_action('init',array($this,'create_post_type'));
 		add_action('wp_head', array($this,'add_page_header'));
 		add_action('template_redirect', array($this,'process_redirect'),10,0);
 		add_action('pre_get_posts', array($this,'sort_posts'),10,1);
+		add_filter( "get_default_comment_status", array($this,'get_default_comment_status'), 10, 3 );
+
 		$this->icon = 'dashicons-list-view';
+	}
+	function get_default_comment_status($status, $post_type, $comment_type) {
+
+	    return $this->comment_type;
+
 	}
 
 	public function sort_posts($query){
@@ -71,6 +80,7 @@ class IoTCat_elements {
 			'exclude_from_search' => false,
 			'publicly_queryable'  => true,
 			'show_ui'             => true,
+			'show_in_rest'       => true,
 			'show_in_nav_menus'   => true,
 			'show_in_menu'        => true,
 			'show_in_admin_bar'   => true,
@@ -129,6 +139,8 @@ class IoTCat_elements {
 	}
 
 	private function get_tags_elements($tags_path){
+
+		return "<div class=\"iotcat-tags-container-new\"><!-- wp:post-terms {\"term\":\"post_tag\",\"textAlign\":\"center\",\"separator\":\"  \",\"style\":{\"typography\":{\"fontStyle\":\"normal\",\"fontWeight\":\"200\"}},\"fontSize\":\"medium\"} /--></div>";
 		$html = "";
 		if(isset($tags_path) && $tags_path !== null){
 			$tag_elements = array();
@@ -169,7 +181,6 @@ class IoTCat_elements {
 	protected function get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path){
 
 			return
-			$this->get_img_html($image_url).
 			"<p>$description</p>".
 			$this->get_tags_elements($tags_path).
 			$this->get_website_link($website).
@@ -217,6 +228,11 @@ class IoTCat_elements {
 								    margin-right: 5px;
 								    border-radius: 2px;
 									}
+
+									.iotcat-tags-container-new{
+										margin-bottom: 1rem;
+									}
+
 							</style>
 							<script>
 									const maxRetries = 500;
@@ -290,7 +306,8 @@ class IoTCat_elements {
         $posts = get_posts($args);
         foreach ($posts as $id_to_delete){
             iotcat_log_me("Deleting $this->post_type with id $id_to_delete");
-            wp_delete_post($id_to_delete);
+
+						$this->delete_post($id_to_delete);
         }
     }
 
@@ -314,39 +331,112 @@ class IoTCat_elements {
 		foreach ($posts as $post) {
 			$id = $post->ID;
 			iotcat_log_me("Deleting post with id ".$id);
-			wp_delete_post($id);
+			$this->delete_post($id);
 		}
 	}
 
 
+	public function delete_post($id){
+		$image_attachment_id = get_post_meta($id,"_image_attachment_id");
+		if(count($image_attachment_id) > 0){
+			wp_delete_attachment( $image_attachment_id[0], true);
+		}
+
+		wp_delete_post($id);
+	}
+
 	private function create_post_element($id,	$name, $description,$website, $embedded_url, $image_url,$tags_path,$original_id,$subscription_id,$last_update_timestamp){
 
 
+		$meta_input = array_merge(
+			$this->default_metadata,
+			array(
+						"description" => $description,
+						"image_url" => $image_url,
+						"original_id" => $original_id,
+						"subscription_id" => $subscription_id,
+						"last_update_timestamp" => $last_update_timestamp
+				)
+		);
 		$element = array(
 					'post_title'    => $name,
 					'post_status'   => 'publish',
 					'post_content' => $this->get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path),
 					'tags_input' => $this->get_tags_input($tags_path),
 					'post_type'     => $this->post_type,
-					'meta_input' => array(
-								"description" => $description,
-								"image_url" => $image_url,
-								"original_id" => $original_id,
-								"subscription_id" => $subscription_id,
-								"last_update_timestamp" => $last_update_timestamp
-
-						)
+					'meta_input' => $meta_input
 					);
 			if($id){
 				$element["ID"] = $id;
 			}
 			return $element;
 	}
+
+
+	public function add_element_image($post_id,$url){
+
+		if(is_null($url) || $url === ""){
+			return;
+		}
+
+		$parse = parse_url($url);
+		$image_name =str_replace("/","_",$parse["path"]);
+
+		$image_url        = $url; // Define the image URL here
+
+		$upload_dir       = wp_upload_dir(); // Set upload folder
+		$image_data       = file_get_contents($image_url); // Get image data
+		$unique_file_name = wp_unique_filename( $upload_dir['path'], $image_name ); // Generate unique name
+		$filename         = basename( $unique_file_name ); // Create image file name
+		iotcat_log_me("Uploading image: ".$unique_file_name);
+		// Check folder permission and define file location
+		if( wp_mkdir_p( $upload_dir['path'] ) ) {
+		  $file = $upload_dir['path'] . '/' . $filename;
+		} else {
+		  $file = $upload_dir['basedir'] . '/' . $filename;
+		}
+
+		// Create the image  file on the server
+		file_put_contents( $file, $image_data );
+
+		// Check image file type
+		$wp_filetype = wp_check_filetype( $filename, null );
+
+		// Set attachment data
+		$attachment = array(
+		    'post_mime_type' => $wp_filetype['type'],
+		    'post_title'     => sanitize_file_name( $filename ),
+		    'post_content'   => '',
+		    'post_status'    => 'inherit'
+		);
+
+		// Create the attachment
+		$attach_id = wp_insert_attachment( $attachment, $file, $post_id );
+
+		// Include image.php
+		require_once(ABSPATH . 'wp-admin/includes/image.php');
+
+		// Define attachment metadata
+		$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
+
+		// Assign metadata to attachment
+		wp_update_attachment_metadata( $attach_id, $attach_data );
+
+		// And finally assign featured image to post
+		set_post_thumbnail( $post_id, $attach_id );
+		return $attach_id;
+	}
+
 	public function add_new_element($name,$description, $website, $embedded_url,$image_url,$tags_path,$original_id,$last_update_timestamp,$subscription_id, $insert_repeated = false){
 
 		if($insert_repeated || !$this->has_element($original_id)){
-            iotcat_log_me("Add new $this->post_type $name");
-            return wp_insert_post( $this->create_post_element(null, $name,$description,$website,$embedded_url,$image_url,$tags_path,$original_id,$subscription_id,  $last_update_timestamp ) );
+						$id = wp_insert_post( $this->create_post_element(null, $name,$description,$website,$embedded_url,$image_url,$tags_path,$original_id,$subscription_id,  $last_update_timestamp ) );
+						$attachment_id = $this->add_element_image($id,$image_url);
+						if(!is_null($attachment_id)){
+							add_post_meta($id,"_image_attachment_id",$attachment_id );
+
+						}
+            return $id;
 		}
 	}
 

@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       IoT Catalogue Integration
  * Description:       Display in WordPress content from IoT Catalogue
- * Version:           1.3.0
+ * Version:           1.4.0-0
  * Author:            UNPARALLEL Innovation, Lda
  * Author URI:        https://www.unparallel.pt
  */
@@ -45,8 +45,17 @@ $iotcat_components_plural_name =  get_option( 'iotcat_options' )["iotcat_field_c
 $iotcat_validations_singular_name =  get_option( 'iotcat_options' )["iotcat_field_validations_singular"] ??$iotcat_default_validations_singular_name;
 $iotcat_validations_plural_name =  get_option( 'iotcat_options' )["iotcat_field_validations_plural"] ??$iotcat_default_validations_plural_name;
 
-$iotcat_components =  new IoTCat_components($iotcat_components_plural_name, $iotcat_components_singular_name );
-$iotcat_validations = new IoTCat_validations($iotcat_validations_plural_name,$iotcat_validations_singular_name );
+
+$iotcat_validations_comment_status=  get_option( 'iotcat_options' )["iotcat_validations_comment_status"] ??$iotcat_default_validations_comment_status;
+$iotcat_components_comment_status=  get_option( 'iotcat_options' )["iotcat_components_comment_status"] ??$iotcat_default_components_comment_status;
+
+$iotcat_validations_um_content_restriction = get_option( 'iotcat_options' )["iotcat_validations_um_content_restriction"] ??$iotcat_default_validations_um_content_restriction;
+$iotcat_components_um_content_restriction = get_option( 'iotcat_options' )["iotcat_components_um_content_restriction"] ??$iotcat_default_components_um_content_restriction;
+
+iotcat_log_me($iotcat_validations_comment_status);
+
+$iotcat_components =  new IoTCat_components($iotcat_components_plural_name, $iotcat_components_singular_name,array("um_content_restriction"=>$iotcat_components_um_content_restriction ),$iotcat_components_comment_status );
+$iotcat_validations = new IoTCat_validations($iotcat_validations_plural_name,$iotcat_validations_singular_name,array("um_content_restriction"=>$iotcat_validations_um_content_restriction ),$iotcat_validations_comment_status );
 function iotcat_added_option($option, $value){
   global $iotcat_base_url;
   if($option === "iotcat_options"){
