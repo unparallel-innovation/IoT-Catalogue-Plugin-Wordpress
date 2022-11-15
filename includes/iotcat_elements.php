@@ -1,5 +1,8 @@
 <?php
 require_once  __DIR__ . '/log.php';
+
+
+
 class IoTCat_elements {
 
 	function __construct($name, $singular_name, $post_type, $default_metadata = array(), $comment_type) {
@@ -9,6 +12,7 @@ class IoTCat_elements {
 		$this->post_type = $post_type;
 		$this->default_metadata = $default_metadata;
 		$this->comment_type = $comment_type;
+
 		add_action('init',array($this,'create_post_type'));
 		add_action('wp_head', array($this,'add_page_header'));
 		add_action('template_redirect', array($this,'process_redirect'),10,0);
@@ -18,11 +22,11 @@ class IoTCat_elements {
 		$this->icon = 'dashicons-list-view';
 	}
 	function get_default_comment_status($status, $post_type, $comment_type) {
-
+	
 	    return $this->comment_type;
 
 	}
-
+	
 	public function sort_posts($query){
 		if(
 			array_key_exists("post_type",$query->query) &&
@@ -182,20 +186,17 @@ class IoTCat_elements {
 
 	protected function get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path){
 
-			return
-			"<p>$description</p>".
-			$this->get_tags_elements($tags_path).
-			$this->get_website_link($website).
-			"<iframe id=\"iotcat-iframe\" style=\"height: 0px;width: 100%\" src=\"$embedded_url\" />
-			";
+		return
+		"<p>$description</p>".
+		$this->get_tags_elements($tags_path).
+		$this->get_website_link($website).
+		"<iframe id=\"iotcat-iframe\" style=\"height: 0px;width: 100%\" src=\"$embedded_url\" ></iframe>";
 
 
 	}
 
 	public function add_page_header() {
 		if(get_post_type() === $this->post_type){
-
-
 
 					?>
 							<style>
@@ -425,6 +426,7 @@ class IoTCat_elements {
 		wp_update_attachment_metadata( $attach_id, $attach_data );
 
 		// And finally assign featured image to post
+	
 		set_post_thumbnail( $post_id, $attach_id );
 		return $attach_id;
 	}
