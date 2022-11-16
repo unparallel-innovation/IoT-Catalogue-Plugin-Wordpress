@@ -238,36 +238,38 @@ class IoTCat_elements {
 
 							</style>
 							<script>
-									const maxRetries = 500;
-									const waitTime = 10;
-									function getIframeRecursive(resolve, reject, retryCount = 0 ){
-										const iframe = document.getElementById("iotcat-iframe");
-										if(retryCount > maxRetries){
-											reject("Max retries exceeded");
-										}else if(!iframe){
-											setTimeout(()=>{getIframeRecursive(resolve,reject,retryCount + 1)},waitTime)
-										}else{
-											resolve(iframe)
-										}
+									window.onload = function() {
+										function waitForElm(selector) {
+											return new Promise(resolve => {
+												if (document.querySelector(selector)) {
+													return resolve(document.querySelector(selector));
+												}
 
-									}
-									function getIframe(){
-										return new Promise((resolve,reject)=>(getIframeRecursive(resolve,reject)))
-									}
-									getIframe().then(iframe=>{
-										function receiveMessage(event) {
-											const data = event.data
-											if (data.action == "resize") {
-												iframe.style.height = data.height + 'px';
+												const observer = new MutationObserver(mutations => {
+													if (document.querySelector(selector)) {
+														resolve(document.querySelector(selector));
+														observer.disconnect();
+													}
+												});
+												observer.observe(document.body, {
+													childList: true,
+													subtree: true
+												});
+											});
+										}
+										waitForElm("#iotcat-iframe").then(iframe=>{
+											function receiveMessage(event) {
+												const data = event.data
+												if (data.action == "resize") {
+													iframe.style.height = data.height + 'px';
+												}
 											}
-										}
-										window.addEventListener("message", receiveMessage, false)
-										window.onbeforeunload = function(){
-											window.removeEventListener("message", receiveMessage);
-										};
-									})
-
-
+											window.addEventListener("message", receiveMessage, false)
+											window.onbeforeunload = function(){
+												window.removeEventListener("message", receiveMessage);
+											};
+										})
+									}
 							</script>
 					<?php
 
