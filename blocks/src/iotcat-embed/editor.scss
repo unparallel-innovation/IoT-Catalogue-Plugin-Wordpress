@@ -4,6 +4,12 @@
  * Replace them with your own styles or remove the file completely.
  */
 
-.wp-block-create-block-test {
-	border: 1px dotted #f00;
+ .wp-block-unparallel-iotcat-embed {
+	background-color: #F1F2F2;
+
+}
+
+.wp-block-unparallel-iotcat-embed > p {
+
+	padding:10px;
 }

@@ -7,7 +7,7 @@
 	"title": "IoT Catalogue embed",
 	"category": "iot-catalogue",
 	"icon": "analytics",
-	"description": "Used to embed IoT Catalogue page on wordpress",
+	"description": "Used to embed IoT Catalogue bars on wordpress",
 	"supports": {
 		"html": false
 	},

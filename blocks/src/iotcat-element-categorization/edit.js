@@ -31,8 +31,11 @@ import metadata from './block.json';
  */
 export default function Edit() {
 	return (
-		<p { ...useBlockProps() }>
-			{ metadata.description}
-		</p>
+		<div { ...useBlockProps() }>
+			<p >
+				{ metadata.description}
+			</p>
+		</div>
+
 	);
 }

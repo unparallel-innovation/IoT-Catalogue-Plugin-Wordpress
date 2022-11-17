@@ -30,9 +30,13 @@ import metadata from './block.json';
  * @return {WPElement} Element to render.
  */
 export default function Edit() {
+
 	return (
-		<p { ...useBlockProps() }>
-			{ metadata.description}
-		</p>
+		<div { ...useBlockProps() }>
+			<p >
+				{ metadata.description}
+			</p>
+		</div>
+
 	);
 }
