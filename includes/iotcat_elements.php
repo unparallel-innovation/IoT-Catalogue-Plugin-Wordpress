@@ -17,10 +17,15 @@ class IoTCat_elements {
 		add_action('wp_head', array($this,'add_page_header'));
 		add_action('template_redirect', array($this,'process_redirect'),10,0);
 		add_action('pre_get_posts', array($this,'sort_posts'),10,1);
+		add_action('pre_get_posts', array($this,'add_post_to_tag_list'),10,1);
+		add_action('pre_get_posts', array($this,'add_post_to_search'),10,1);
+		
 		add_filter( "get_default_comment_status", array($this,'get_default_comment_status'), 10, 3 );
 
 		$this->icon = 'dashicons-list-view';
 	}
+
+
 	function get_default_comment_status($status, $post_type, $comment_type) {
 	
 	    return $this->comment_type;
@@ -35,6 +40,40 @@ class IoTCat_elements {
 			$query->set( 'order', 'ASC' );
 			$query->set( 'orderby', 'title' );
 		}
+
+	}
+
+	public function add_post_to_tag_list($query){
+		if (  
+			!is_admin() // Only target front end queries
+			&& $query->is_main_query() // Only target the main query
+		//	&& $query->is_category()   // Only target category archives [comment out if not needed]
+			&& $query->is_tag()        // Only target tag archives [comment out if not needed]
+		) {			
+			$this->add_post_type_to_query($query);
+		}
+
+	}
+
+
+	public function add_post_to_search($query){
+		if ( $query->is_search ) {
+			$this->add_post_type_to_query($query);
+		}
+		
+		return $query;
+	}
+	
+	private function add_post_type_to_query($query){
+		$post_types = array($this->post_type);
+		$current_post_types = $query->get("post_type");
+		$var_type = gettype($current_post_types);
+		if($var_type === "array"){
+			$post_types = array_merge($post_types,$current_post_types);
+		}else if($var_type === "string" && $current_post_types!==""){
+			array_push($post_types,$current_post_types);
+		}
+		$query->set( 'post_type',$post_types);
 	}
 
 	public function process_redirect(){
