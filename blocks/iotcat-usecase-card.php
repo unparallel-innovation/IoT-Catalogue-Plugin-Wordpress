@@ -32,6 +32,7 @@ function iotcat_usecase_card_render_boxes($boxes,$color){
 
 
 function iotcat_usecase_card_render_callback( $block_attributes, $content, $block ) {
+
   /*  if ( ! isset( $block->context['postId'] ) ) {
 		return '';
 	}
@@ -44,7 +45,6 @@ function iotcat_usecase_card_render_callback( $block_attributes, $content, $bloc
     if(count($embedded_url) === 0){
         return "";
     }*/
-    iotcat_log_me($block_attributes);
     $boxes = $block_attributes["boxes"];
     $style = "";
     $color = null;
@@ -61,6 +61,7 @@ function iotcat_usecase_card_render_callback( $block_attributes, $content, $bloc
                 </h5>
                 <div class="d-flex flex-wrap ">
                     '.iotcat_usecase_card_render_boxes($boxes,$color).'
+                </div>
             </div>
         <!-- /wp:unparallel/base-card -->
     '
