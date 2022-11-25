@@ -13,7 +13,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { useBlockProps } from '@wordpress/block-editor';
 
-import { TextControl } from '@wordpress/components';
+import { TextControl, Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 /**
  * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
@@ -23,6 +23,9 @@ import { useState } from '@wordpress/element';
  */
 import './editor.scss';
 import metadata from './block.json';
+
+import {Icon,ColorPalette} from "@wordpress/components";
+
 /**
  * The edit function describes the structure of your block in the context of the
  * editor. This represents what the editor will render when the block is used.
@@ -31,30 +34,102 @@ import metadata from './block.json';
  *
  * @return {WPElement} Element to render.
  */
-export default function Edit( { attributes, setAttributes } ) {
 
-	const [boxTitle, setBoxTitle] = useState();
-	const [baxValue, setBoxValue] = useState();
+const cssPrefix = "iotcat-usecase-card-";
+
+export default function Edit( { attributes, setAttributes } ) {
+	console.log("attributes",attributes)
+	const [boxLabel, setBoxLabel] = useState();
+	const [boxValue, setBoxValue] = useState();
+	
+	function deleteBox(i){
+
+		const boxes = [...attributes.boxes];
+		boxes.splice(i,1);
+		setAttributes({boxes});
+	}
+
 	function renderTitleTextBox(){
 		return (
 			<TextControl
 			label="Card Title"
 			value={ attributes.title }
-			onChange={ ( title ) => setAttributes({title,boxes:[{name:title}]})}
+			onChange={ ( title ) => setAttributes({title})}
 		/>
+		)
+	}
+
+	function renderBox(box,i){
+		return (
+			<div className={cssPrefix + "box-entry"} key={i}>
+				<div className={cssPrefix +"box-entry-element"}>{box.label}</div>
+				<div className={cssPrefix +"box-entry-element"}>{box.value}</div>
+				<Icon icon="no" role="button" onClick={()=>{deleteBox(i)}} className={cssPrefix +"icon"}/>
+			</div>
 		)
 	}
 
 
 
 
+	function addNewBox(){
+		const boxes = attributes.boxes || [];
+		const newBoxes = ([
+			...boxes,
+			{label:boxLabel,value:boxValue}
+		])
+		setAttributes({boxes:newBoxes})
+		setBoxLabel("");
+		setBoxValue("");
+		
+	}
+
+	function renderBoxes(){
+		if(attributes.boxes?.length > 0){
+			return <div className={cssPrefix +"box-entries"}>{attributes.boxes.map((box,i)=>renderBox(box,i))}</div>
+		}
+	}
+
+
 	function renderAddBoxElement(){
 		return (
 			<>
+
+
 				<label>Add New Box</label>
-				<div>
-					Todo
-				</div>
+			<div className={cssPrefix + "add-box"}>
+					<TextControl
+						className={cssPrefix + "flex-2"}
+						label="Label"
+						value={ boxLabel }
+						onChange={ setBoxLabel}
+				/>
+			
+					<TextControl
+						className={cssPrefix + "flex-2"}
+						label="Value"
+						value={ boxValue }
+						onChange={ setBoxValue}
+				/>
+					<Button onClick={addNewBox} disabled={!boxLabel || !boxValue }>
+						Add new box
+					</Button>
+			
+					</div>
+			</>
+		)
+	}
+
+	function renderColorPicker(){
+		const colors = wp.data.select( 'core/block-editor' ).getSettings().colors
+		return (
+			<>
+				<p>Select color</p>
+				<ColorPalette
+					colors={ colors }
+					value={ attributes.color }
+					onChange={ ( color ) =>{setAttributes({color})}}
+				/>
 			</>
 		)
 	}
@@ -65,7 +140,10 @@ export default function Edit( { attributes, setAttributes } ) {
 			<p >
 				{ metadata.description}
 			</p>
+			{renderColorPicker()}
 			{renderTitleTextBox()}
+			{renderAddBoxElement()}
+			{renderBoxes()}
 		</div>
 
 	);
