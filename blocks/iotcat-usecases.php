@@ -2,22 +2,22 @@
 
 function iotcat_usecases_add_page_header() {
 
-        ?>  
-                <script src="https://cdn.jsdelivr.net/npm/@glidejs/glide"></script>
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.core.min.css">
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.theme.min.css">
-                
-                <script>
-                    	window.onload = function() {
-                            if(document.getElementsByClassName("glide").length === 0){
-                                return;
-                            }
-
-                            new Glide('.glide').mount()
-                         
+    ?>  
+            <script src="https://cdn.jsdelivr.net/npm/@glidejs/glide"></script>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.core.min.css">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.theme.min.css">
+            
+            <script>
+                    window.onload = function() {
+                        if(document.getElementsByClassName("glide").length === 0){
+                            return;
                         }
-                </script>
-        <?php
+
+                        new Glide('.glide').mount()
+                     
+                    }
+            </script>
+    <?php
 
 
 }
@@ -25,6 +25,7 @@ function iotcat_usecases_add_page_header() {
 //<!-- wp:unparallel/iotcat-usecase-card {"title":"Title","boxes":[{"label":"m","value":"d"}],"color":"#f78da7"} /-->
 //json_encode
 function iotcat_get_usecase_block($usecase){
+    //return '<div style="width:100%;height:200px;background-color:green">AAA</div>';
     global $iotcat_base_url ;
     $title = $usecase["name"];
     $href = $iotcat_base_url.'/validations/'.$usecase["_id"];
@@ -38,7 +39,17 @@ function iotcat_get_usecase_block($usecase){
     return do_blocks('<div class="mb-3"><a target="_blank" href="'.$href.'" class="text-decoration-none"><!-- wp:unparallel/iotcat-usecase-card {"title":"'.$title.'","boxes":'.json_encode($boxes).'} /--></a></div>');
 }
 
-function iotcat_usecases_render_callback( $block_attributes, $content, $block ) {
+
+function iotcat_usecases_render_buttons($count){
+    $html = "";
+    for($i=0;$i<$count;$i++){
+        $html = $html.'<button class="glide__bullet" data-glide-dir="='.$i.'"></button>';
+    }
+    return $html;
+}
+
+
+function iotcat_usecases_render_callback_old( $block_attributes, $content, $block ) {
     global $iotcat_base_url ;
     
     if( !array_key_exists("iotcat_field_token",get_option( 'iotcat_options' ))){
@@ -71,9 +82,7 @@ function iotcat_usecases_render_callback( $block_attributes, $content, $block ) 
         <div class="iotcat-usecases-bullets">
 
             <div class="glide__bullets" data-glide-el="controls[nav]">
-                <button class="glide__bullet" data-glide-dir="=0"></button>
-                <button class="glide__bullet" data-glide-dir="=1"></button>
-                <button class="glide__bullet" data-glide-dir="=2"></button>
+               '.iotcat_usecases_render_buttons(ceil(count($usecases)/$items_per_slide )).'
             </div>
         </div>
     </div>
@@ -82,27 +91,48 @@ function iotcat_usecases_render_callback( $block_attributes, $content, $block ) 
     return $html;
     
     
-    return '
-        <div class="glide">
-            <div data-glide-el="track" class="glide__track">
-                <ul class="glide__slides">
-                    <li class="glide__slide"><div style="height:50px;width:50px;background-color:grey">A</div></li>
-                    <li class="glide__slide"><div style="height:50px;width:50px;background-color:grey">B</div></li>
-                    <li class="glide__slide"><div style="height:50px;width:50px;background-color:grey">C</div></li>
-                </ul>
-            </div>
 
-            <div class="glide__bullets" data-glide-el="controls[nav]">
-                <button class="glide__bullet" data-glide-dir="=0"></button>
-                <button class="glide__bullet" data-glide-dir="=1"></button>
-                <button class="glide__bullet" data-glide-dir="=2"></button>
-            </div>
-        </div>
-    ';
+
+}
+
+function iotcat_usecases_render_callback( $block_attributes, $content, $block ) {
+    global $iotcat_base_url ;
+    if( !array_key_exists("iotcat_field_token",get_option( 'iotcat_options' ))){
+        return "<div>Token not defined</div>";
+    }
+    $token = get_option( 'iotcat_options' )["iotcat_field_token"];
+    $response = wp_remote_get( $iotcat_base_url."/api/useCaseWithStats?access_token=".$token );
+    $usecases = json_decode( wp_remote_retrieve_body( $response ), true );
+    $items_per_slide = 6;
+    $slides = array();
+    $html = '<div class="row">';
+    foreach($usecases as $key=>$usecase){
+        $rem = $key%$items_per_slide ;
+        if($rem === 0 && $key < count($usecases) - 1 && $key > 0){
+            $html = $html.'</div>';
+            array_push($slides,$html);
+            $html ='<div class="row">';
+        }
+        
+        $html = $html.'<div class="col-12 col-md-6">'.iotcat_get_usecase_block($usecase).'</div>';
+
+    }
+
+    $html = $html.'</div>';
+    array_push($slides,$html);
+    $carousel = new IoTCat_carousel($slides,array("hide_buttons"=>true));
+    return  $carousel->render();
+
+
+
+
+
+    
+    
+
 
 }
   function iotcat_register_usecases_block() {
-
     add_action('wp_head', "iotcat_usecases_add_page_header");
     register_block_type(__DIR__ . '/build/iotcat-usecases' ,
     array(

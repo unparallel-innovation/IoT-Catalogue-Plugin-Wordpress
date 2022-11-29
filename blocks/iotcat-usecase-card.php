@@ -8,11 +8,11 @@ function iotcat_usecase_card_render_box($label, $value, $color,$last_square = fa
     $color_style = $color?"color: ".$color."!important":"";
     return '
     <div class="bg-light flex-grow-1 text-center pe-3 ps-3  border-white border-top '.$border_class.'">
-        <h6 class="text-primary small mt-2 mb-0 " style="'.$color_style.'">
-            '.$value.'
+        <h6 class="text-primary mt-2 mb-0 " style="'.$color_style.'">
+            <small>'.$value.'</small>
         </h6>
-        <h6 class="small mb-2 mt-0">
-           '.$label.'
+        <h6 class="mb-2 mt-0">
+           <small>'.$label.'</small>
         </h6>
     </div>
     ';

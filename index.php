@@ -33,11 +33,11 @@
   require_once  __DIR__ . '/includes/iotcat_subscription.php';
   require_once  __DIR__ . '/includes/iotcat_components.php';
   require_once  __DIR__ . '/includes/iotcat_validations.php';
-
+  require_once  __DIR__ . '/includes/iotcat_bs_carousel.php';
   require_once  __DIR__ . '/blocks/index.php';
 
 
-$iotcat_base_url = "https://www.iot-catalogue.com";
+$iotcat_base_url = "https://dev.iot-catalogue.com";
 
 
 $iotcat_field_data_update_interval =  get_option( 'iotcat_options' )["iotcat_field_data_update_interval"] ??$iotcat_default_data_update_interval;
