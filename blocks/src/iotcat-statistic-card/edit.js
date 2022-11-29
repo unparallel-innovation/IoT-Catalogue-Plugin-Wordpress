@@ -1,80 +1,92 @@
-/**
- * WordPress components that create the necessary UI elements for the block
- *
- * @see https://developer.wordpress.org/block-editor/packages/packages-components/
- */
+const { useBlockProps, InspectorControls, MediaUpload, MediaUploadCheck } = wp.blockEditor;
+const { ColorPalette, TextControl, PanelBody, IconButton } = wp.components;
 
-
-/**
- * React hook that is used to mark the block wrapper element.
- * It provides all the necessary props like the class name.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
- */
-import { useBlockProps,InnerBlocks } from '@wordpress/block-editor';
-import { ColorPalette  } from '@wordpress/components';
-import {useState } from '@wordpress/element';
-/**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- *
- * @param {Object}   props               Properties passed to the function.
- * @param {Object}   props.attributes    Available block attributes.
- * @param {Function} props.setAttributes Function that updates individual attributes.
- *
- * @return {WPElement} Element to render.
- */
 export default function Edit( { attributes, setAttributes } ) {
-	const blockProps = useBlockProps();
 
-	const colors = wp.data.select( 'core/block-editor' ).getSettings().colors
+	const {
+		color, image, type, endpoint
+	} = attributes
 
-
-	function setNodeColor(node){
-		if(node){
-			if(attributes.borderColor){
-				node.style.setProperty("background-color",attributes.borderColor , "important");
-			}else{
-				node.style.removeProperty("background-color");
-			}			
-		}
-
+	function renderColorPicker(){
+		const colors = wp.data.select( 'core/block-editor' ).getSettings().colors
+		return (
+			<>
+				<p>Select text color</p>
+				<ColorPalette
+					colors={ colors }
+					value={ color }
+					onChange={ ( color ) =>{setAttributes({color})}}
+				/>
+			</>
+		)
 	}
-	return (
-		<div data-main-block="true" { ...blockProps } >
-			<p>Select border color</p>
-			<ColorPalette
-				colors={ colors }
-				value={ attributes.borderColor }
-				onChange={ ( color ) =>{setAttributes({borderColor:color})}}
-			/>
-			<div style={{display:"flex"}}>
-				<div ref={setNodeColor} className="iotcat-edit-base-card-margin" ></div>
-				<div style={{flex:"1 0"}}><InnerBlocks/></div>
-			</div>
-			
 
+	function renderStatisticTypeTextBox(){
+		return (
+			<TextControl
+			label="Statistic Type"
+			value={ type }
+			onChange={ ( type ) => setAttributes({type})}
+		/>)
+	}
+
+	function renderStatisticEndpointTextBox(){
+		return (
+			<TextControl
+			label="Statistic Endpoint"
+			value={ endpoint }
+			onChange={ ( endpoint ) => setAttributes({endpoint})}
+		/>)
+	}
+
+	function renderIconImage(){
+		if(image){
+			return (
+				<>
+					<div style={{fontSize: '11px', textTransform: 'uppercase', fontWeight: '500'}}>Statistic Icon</div>
+					<div style={{width: '50px', height: '50px', marginTop: '8px'}}>
+						<img src={image} />
+					</div>
+				</>
+			)
+		}
+		return '';
+	}
+
+	function onSelectImage(newImage){
+		setAttributes({image: newImage.sizes.full.url})
+	}
+
+	return (<>
+		<InspectorControls style={{marginBottom: '40px'}}>
+			<PanelBody>
+				<p><strong>Select an Icon Image</strong></p>
+				<MediaUploadCheck>
+					<MediaUpload 
+						onSelect={onSelectImage}
+						allowedTypes={ ['image'] }
+						value={image}
+						render={({open}) => (
+							<IconButton 
+								onClick={open} 
+								icon="upload"
+								className="editor-media-placeholder__button is-button is-default is-large"
+							>Icon Image</IconButton>
+						)}
+					/>
+				</MediaUploadCheck>
+			</PanelBody>	
+		</InspectorControls>
+		
+		<div { ...useBlockProps() }>
+			<p >
+				Statistic Card
+			</p>
+			{renderColorPicker()}
+			{renderStatisticTypeTextBox()}
+			{renderStatisticEndpointTextBox()}
+			{renderIconImage()}
 		</div>
-	);
-
-	return (
-		<div data-main-block="true" { ...blockProps } >
-			<p>Select border color</p>
-			<ColorPalette
-				colors={ colors }
-				value={ attributes.borderColor }
-				onChange={ ( color ) =>{setAttributes({borderColor:color})}}
-			/>
-			<div style={{display:"flex"}}>
-				<div ref={setNodeColor} className="iotcat-edit-base-card-margin" ></div>
-				<div style={{flex:"1 0"}}><InnerBlocks/></div>
-			</div>
-			
-
-		</div>
-	);
+		</>
+	)
 }
-
-

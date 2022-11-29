@@ -5,20 +5,25 @@
 	"version": "1.0.0",
 	"title": "Statistic Card",
 	"category": "iot-catalogue",
-	"icon": "flag",
-	"description": "A Gutenberg block to show your pride! This block enables you to type text and style it with the color font Gilbert from Type with Pride.",
+	"icon": "tag",
+	"description": "Renders a statistic card about a specific element",
 	"attributes": {
-
-		"borderColor": {
+		"type": {
 			"type": "string"
-		  }
+		},
+		"endpoint": {
+			"type": "string"
+		},
+		"color": {
+			"type": "string"
+		},
+		"image": {
+			"type": "string",
+			"default": null
+		}
 	},
 	"supports": {
-		"html": false,
-		"color": {
-			"background": true,
-			"text": true
-		}
+		"html": false
 	},
 	"textdomain": "gutenpride",
 	"editorScript": "file:./index.js",
