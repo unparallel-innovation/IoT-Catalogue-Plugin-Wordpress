@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       IoT Catalogue Integration
  * Description:       Display in WordPress content from IoT Catalogue
- * Version:           1.4.0
+ * Version:           1.5.0
  * Author:            UNPARALLEL Innovation, Lda
  * Author URI:        https://www.unparallel.pt
  */
@@ -114,8 +114,8 @@ add_filter( 'cron_schedules', 'iotcat_add_update_interval' );
 function iotcat_add_update_interval($schedules){
   global $iotcat_field_data_update_interval;
   $schedules['iotcat_update_interval'] = array(
-        'interval' => intval($iotcat_field_data_update_interval)*3600,
-        'display'  => esc_html__( "Every .$iotcat_field_data_update_interval hours" ), );
+        'interval' => intval($iotcat_field_data_update_interval)*60,
+        'display'  => esc_html__( "Every .$iotcat_field_data_update_interval minutes" ), );
     return $schedules;
 
 }
