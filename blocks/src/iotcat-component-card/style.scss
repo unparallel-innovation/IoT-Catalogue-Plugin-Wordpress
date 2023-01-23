@@ -1,0 +1,19 @@
+/**
+ * The following styles get applied both on the front of your site
+ * and in the editor.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+
+.wp-block-create-block-test {
+	background-color: #21759b;
+	color: #fff;
+	padding: 2px;
+}
+
+.iotcat-component-card {
+	background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+	background:url("https://iot-catalogue.s3.amazonaws.com/images/7XxZHP6E3E3ukgxiL/csm_sshot_software_01_917e8f387e.jpg");
+}

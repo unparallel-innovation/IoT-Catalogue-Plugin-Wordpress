@@ -6,7 +6,7 @@
     }
     return '
     <div class="iotcat-base-card d-flex">
-				<div class="iotcat-base-card-margin rounded-start bg-primary flex-shrink-0"  style="'.$style.'"></div>
+				<div class="iotcat-base-card-margin rounded-start bg-primary flex-shrink-0" style="'.$style.'"></div>
 				<div class="iotcat-base-card-body flex-grow-1 border rounded-end border-2 overflow-hidden">'. $content.'</div>
 			</div>
     ';

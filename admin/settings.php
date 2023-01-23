@@ -98,7 +98,7 @@
      add_settings_field(
          'iotcat_field_data_update_interval', // As of WP 4.6 this value is used only internally.
                                  // Use $args' label_for to populate the id inside the callback.
-             __( 'Data update interval (h)', 'iotcat' ),
+             __( 'Data update interval (min)', 'iotcat' ),
          'iotcat_field_data_update_interval_cb',
          'iotcat',
          'iotcat_section_developers',
@@ -221,7 +221,7 @@
   		value="<?php echo $options[ $args['label_for'] ] ?? $iotcat_default_data_update_interval; ?>"
   	/>
   	<p class="description">
-  	<?php esc_html_e( 'Period in hours between data updates.', 'iotcat' ); ?>
+  	<?php esc_html_e( 'Period in minutes between data updates.', 'iotcat' ); ?>
   	</p>
 
      <?php

@@ -37,7 +37,7 @@
   require_once  __DIR__ . '/blocks/index.php';
 
 
-$iotcat_base_url = "https://dev.iot-catalogue.com";
+$iotcat_base_url = "https://www.iot-catalogue.com";
 
 
 $iotcat_field_data_update_interval =  get_option( 'iotcat_options' )["iotcat_field_data_update_interval"] ??$iotcat_default_data_update_interval;
@@ -116,14 +116,15 @@ add_filter( 'cron_schedules', 'iotcat_add_update_interval' );
 function iotcat_add_update_interval($schedules){
   global $iotcat_field_data_update_interval;
   $schedules['iotcat_update_interval'] = array(
-        'interval' => intval($iotcat_field_data_update_interval)*3600,
-        'display'  => esc_html__( "Every .$iotcat_field_data_update_interval hours" ), );
+        'interval' => intval($iotcat_field_data_update_interval)*60,
+        'display'  => esc_html__( "Every .$iotcat_field_data_update_interval minute" ), );
     return $schedules;
 
 }
 
 
 function iotcat_update_data_exec(){
+
   $user_id = get_option("iotcat_plugin_admin_user_id");
   if($user_id > 0){
     wp_set_current_user($user_id);
