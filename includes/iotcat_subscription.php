@@ -63,26 +63,9 @@
 								$new_last_update_timestamp = array_key_exists("_lastUpdateTimestamp", $id_info)?round( ($id_info["_lastUpdateTimestamp"])/1000) :0;
 								$last_update_timestamp = $metadata["last_update_timestamp"][0];
 								if($new_last_update_timestamp  >$last_update_timestamp ){
-									$element = $this->get_tpi_element($instance::$page_name,$id);
-									$instance->update_element($post->ID,
-										array_key_exists("name", $element) ?$element["name"]:"",
-										array_key_exists("description", $element) ?$element["description"]:"",
-										array_key_exists("_website", $element) ?$element["_website"]:"",
-										array_key_exists("_embeddedUrl", $element) ?$element["_embeddedUrl"]:"",
-										array_key_exists("_imageUrl", $element) ?$element["_imageUrl"]:"",
-										array_key_exists("_tagsPath", $element) ?$element["_tagsPath"]:null,
-										array_key_exists("_id", $element) ?$element["_id"]:"",
-										array_key_exists("_lastUpdateTimestamp", $element) ? round( $element["_lastUpdateTimestamp"]/1000):0,
-										$this->id
-									);
-								}
-
-						}else{
-							iotcat_log_me("Element ".$id." does not exists");
-							$element = $this->get_tpi_element($instance::$page_name,$id);
-							if(array_key_exists("name",$element)){
-
-								$instance->add_new_element(
+									try {
+										$element = $this->get_tpi_element($instance::$page_name,$id);
+										$instance->update_element($post->ID,
 											array_key_exists("name", $element) ?$element["name"]:"",
 											array_key_exists("description", $element) ?$element["description"]:"",
 											array_key_exists("_website", $element) ?$element["_website"]:"",
@@ -93,7 +76,37 @@
 											array_key_exists("_lastUpdateTimestamp", $element) ? round( $element["_lastUpdateTimestamp"]/1000):0,
 											$this->id
 										);
+									} catch (Exception $e) {
+										iotcat_log_me("Failed to update element");
+										iotcat_log_me($e->getMessage());
+									}
+									
+								
+								}
+
+						}else{
+							iotcat_log_me("Element ".$id." does not exists");
+							try {
+								$element = $this->get_tpi_element($instance::$page_name,$id);
+								if(array_key_exists("name",$element)){
+									
+									$instance->add_new_element(
+												array_key_exists("name", $element) ?$element["name"]:"",
+												array_key_exists("description", $element) ?$element["description"]:"",
+												array_key_exists("_website", $element) ?$element["_website"]:"",
+												array_key_exists("_embeddedUrl", $element) ?$element["_embeddedUrl"]:"",
+												array_key_exists("_imageUrl", $element) ?$element["_imageUrl"]:"",
+												array_key_exists("_tagsPath", $element) ?$element["_tagsPath"]:null,
+												array_key_exists("_id", $element) ?$element["_id"]:"",
+												array_key_exists("_lastUpdateTimestamp", $element) ? round( $element["_lastUpdateTimestamp"]/1000):0,
+												$this->id
+											);
+								}
+							} catch (Exception $e) {
+								iotcat_log_me("Failed to add element");
+								iotcat_log_me($e->getMessage());
 							}
+			
 
 
 						}

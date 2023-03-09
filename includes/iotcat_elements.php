@@ -32,8 +32,9 @@ class IoTCat_elements {
 		if($query->is_tag()){
 	
 			if(array_key_exists("post_type",$query->query_vars)){
+				$post_type = $query->query_vars["post_type"];
 				$query->set( 'post_type', array_merge(
-						$query->query_vars["post_type"],
+					  is_array($post_type)?	$post_type:array($post_type),
 						array( $this->post_type )
 					) 
 				);
