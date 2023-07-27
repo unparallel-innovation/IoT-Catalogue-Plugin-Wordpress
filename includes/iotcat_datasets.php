@@ -1,6 +1,9 @@
 <?php
 require_once  __DIR__ . '/log.php';
 require_once  __DIR__ . '/iotcat_elements.php';
+
+
+
 class IoTCat_datasets  extends IoTCat_elements{
 
 	function __construct($name = "Datasets", $singular_name = "Dataset",$default_metadata,$comment_type, $post_type = "iotcat_dataset") {
@@ -10,10 +13,27 @@ class IoTCat_datasets  extends IoTCat_elements{
 
 		add_action('manage_iotcat_dataset_posts_columns',array($this,'columns'),10,2);
 		add_action('manage_iotcat_dataset_posts_custom_column',array($this,'column_data'),11,2);
-
+		$this->should_post_process_iframe_url = true;
 
 	}
-
+	protected function post_process_iframe_url(){
+		?>
+			
+			var iframe = document.getElementById("iotcat-iframe");
+			var _url = iframe?.dataset?.url
+			
+			if(_url){
+				var _owner = localStorage.getItem("owner")
+				let __url = _url
+				if(_owner){
+					__url = `${_url}&owner=${_owner}`
+				}
+				iframe.src = __url
+				
+			}
+			
+		<?php
+	}
 	public static $page_name = "dataSets";
 
 
@@ -84,6 +104,17 @@ class IoTCat_datasets  extends IoTCat_elements{
 				'iotcat_timeframe' => 'Timeframe'
 			));
 	}
+
+	function run_js_code(){
+		?>
+
+
+		console.log("js code")
+
+		<?php
+	}
+
+
 
 	function column_data($column,$post_id) {
 		switch($column) {

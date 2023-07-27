@@ -12,7 +12,7 @@ class IoTCat_elements {
 		$this->post_type = $post_type;
 		$this->default_metadata = $default_metadata;
 		$this->comment_type = $comment_type;
-
+		$this->should_post_process_iframe_url = false;
 		add_action('init',array($this,'create_post_type'));
 		add_action('wp_head', array($this,'add_page_header'));
 		add_action('template_redirect', array($this,'process_redirect'),10,0);
@@ -20,13 +20,22 @@ class IoTCat_elements {
 		add_filter( "get_default_comment_status", array($this,'get_default_comment_status'), 10, 3 );
 
 		$this->icon = 'dashicons-list-view';
+		
 	}
+
+	protected function post_process_iframe_url(){
+		return "";
+	}
+
+
 	function get_default_comment_status($status, $post_type, $comment_type) {
 	
 	    return $this->comment_type;
 
 	}
 	
+
+
 	public function pre_get_posts($query){
 	
 		if($query->is_tag()){
@@ -201,14 +210,20 @@ class IoTCat_elements {
 
 
 	protected function get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path){
-
+		
+		$url = $this->should_post_process_iframe_url?"":$embedded_url;
+		
 		return
 		"<p>$description</p>".
 		$this->get_tags_elements($tags_path).
 		$this->get_website_link($website).
-		"<iframe id=\"iotcat-iframe\" style=\"height: 0px;width: 100%\" src=\"$embedded_url\" ></iframe>";
+		"<iframe id=\"iotcat-iframe\"  data-url=\"$embedded_url\" style=\"height: 0px;width: 100%\" src=\"$url\" ></iframe>";
 
 
+	}
+
+	protected function run_js_code(){
+		echo "";
 	}
 
 	public function add_page_header() {
@@ -254,6 +269,8 @@ class IoTCat_elements {
 
 							</style>
 							<script>
+		
+
 									window.onload = function() {
 										function waitForElm(selector) {
 											return new Promise(resolve => {
@@ -284,8 +301,16 @@ class IoTCat_elements {
 											window.onbeforeunload = function(){
 												window.removeEventListener("message", receiveMessage);
 											};
+
+											const url = iframe.dataset.url
+											console.log("url",url)
+											<?php
+												 $this->run_js_code();
+												 $this->post_process_iframe_url();
+											?>
 										})
 									}
+									
 							</script>
 					<?php
 
