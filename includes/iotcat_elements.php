@@ -301,9 +301,7 @@ class IoTCat_elements {
 											window.onbeforeunload = function(){
 												window.removeEventListener("message", receiveMessage);
 											};
-
-											const url = iframe.dataset.url
-											console.log("url",url)
+	
 											<?php
 												 $this->run_js_code();
 												 $this->post_process_iframe_url();
