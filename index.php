@@ -42,6 +42,7 @@ $iotcat_base_url = "https://www.iot-catalogue.com";
 
 $iotcat_field_data_update_interval =  get_option( 'iotcat_options' )["iotcat_field_data_update_interval"] ??$iotcat_default_data_update_interval;
 
+
 $iotcat_components_singular_name =  get_option( 'iotcat_options' )["iotcat_field_components_singular"] ??$iotcat_default_components_singular_name;
 $iotcat_components_plural_name =  get_option( 'iotcat_options' )["iotcat_field_components_plural"] ??$iotcat_default_components_plural_name;
 
@@ -75,6 +76,26 @@ $iotcat_datasets = new IoTCat_datasets($iotcat_datasets_plural_name,$iotcat_data
 $iotcat_data_concepts = new IoTCat_data_concepts($iotcat_data_concepts_plural_name,$iotcat_data_concepts_singular_name,array("um_content_restriction"=>$iotcat_data_concepts_um_content_restriction ),$iotcat_data_concepts_comment_status );
 $iotcat_measurable_quantities = new IoTCat_measurable_quantities($iotcat_measurable_quantities_plural_name,$iotcat_measurable_quantities_singular_name,array("um_content_restriction"=>$iotcat_measurable_quantities_um_content_restriction ),$iotcat_measurable_quantities_comment_status );
 
+
+
+
+function iotcat_get_element_instances(){
+  global $iotcat_components,$iotcat_validations,$iotcat_datasets,$iotcat_data_concepts,$iotcat_measurable_quantities;
+  $element_instances = array();
+
+  $iotcat_components_enabled = get_option( 'iotcat_options' )["iotcat_field_components_enabled"]!=="-1" ;
+  if($iotcat_components_enabled){
+    array_push( $element_instances ,$iotcat_components);
+  }
+  $iotcat_validations_enabled = get_option( 'iotcat_options' )["iotcat_field_validations_enabled"]!=="-1" ;
+  if($iotcat_validations_enabled){
+    array_push(  $element_instances ,$iotcat_validations);
+  }
+
+  return  $element_instances;
+}
+
+
 function iotcat_added_option($option, $value){
   global $iotcat_base_url;
   if($option === "iotcat_options"){
@@ -82,7 +103,7 @@ function iotcat_added_option($option, $value){
     if(array_key_exists("iotcat_field_token", $value)){
       $token = $value["iotcat_field_token"];
       if($token){
-        $iotcat_subscription = new IoTCat_subscription($token,array($iotcat_components,$iotcat_validations,$iotcat_datasets,$iotcat_data_concepts,$iotcat_measurable_quantities),$iotcat_base_url);
+        $iotcat_subscription = new IoTCat_subscription($token,iotcat_get_element_instances(),$iotcat_base_url);
         update_option( 'iotcat_subscription_instance', $iotcat_subscription);
         iotcat_sync_data($iotcat_subscription);
       }
@@ -116,7 +137,7 @@ function iotcat_updated_option($option, $old_value,$value){
       $token = $value["iotcat_field_token"];
       if($token){
         global $iotcat_components,$iotcat_validations,$iotcat_datasets,$iotcat_data_concepts,$iotcat_measurable_quantities;
-        $iotcat_subscription = new IoTCat_subscription($token,array($iotcat_components,$iotcat_validations,$iotcat_datasets,$iotcat_data_concepts,$iotcat_measurable_quantities),$iotcat_base_url);
+        $iotcat_subscription = new IoTCat_subscription($token,iotcat_get_element_instances(),$iotcat_base_url);
         update_option( 'iotcat_subscription_instance', $iotcat_subscription);
         iotcat_sync_data($iotcat_subscription);
       }

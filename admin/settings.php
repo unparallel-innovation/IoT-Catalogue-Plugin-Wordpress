@@ -31,13 +31,10 @@
 
     $iotcat_default_data_update_interval;
 
-    iotcat_log_me("--------");
-    iotcat_log_me( $iotcat_default_data_concepts_singular_name);
 
     if($_POST["submit"] === "Delete Subscription"){
       unset($options["iotcat_field_token"]);
     }
-
 
     $data_update_interval = $iotcat_default_data_update_interval;
 
@@ -49,8 +46,12 @@
       $data_update_interval = $options["iotcat_field_data_update_interval"];
     }
 
+
     $component_singular = $iotcat_default_components_singular_name;
     $component_plural = $iotcat_default_components_plural_name;
+
+
+
 
     if(array_key_exists("iotcat_field_components_singular", $options) &&  $options["iotcat_field_components_singular"]){
       $component_singular = $options["iotcat_field_components_singular"];
@@ -106,10 +107,14 @@
       $measurable_quantity_plural = $options["iotcat_field_measurable_quantities_plural"];
     }
 
+    $iotcat_field_components_enabled = $options["iotcat_field_components_enabled"]==="1"?$options["iotcat_field_components_enabled"]:"-1";
+    $iotcat_field_validations_enabled = $options["iotcat_field_validations_enabled"]==="1"?$options["iotcat_field_validations_enabled"]:"-1";
     return array_merge(
         $options
         ,array(
           "iotcat_field_data_update_interval"=>$data_update_interval,
+          "iotcat_field_components_enabled"=>$iotcat_field_components_enabled ,
+          "iotcat_field_validations_enabled"=>$iotcat_field_validations_enabled ,
           "iotcat_field_components_singular"=>$component_singular ,
           "iotcat_field_components_plural"=>$component_plural,
           "iotcat_field_validations_singular"=>$validation_singular ,
@@ -135,7 +140,7 @@
      // Register a new section in the "iotcat" page.
      add_settings_section(
          'iotcat_section_developers',
-         __( 'IoT Catalogue Subscription', 'iotcat' ), 'iotcat_section_developers_callback',
+         __( 'IoT Catalogue Subscription ', 'iotcat' ), 'iotcat_section_developers_callback',
          'iotcat'
      );
 
@@ -171,6 +176,24 @@
          )
      );
 
+     function iotcat_add_element_enable_field($element_name){
+      add_settings_field(
+        'iotcat_field_'.$element_name.'_enabled', // As of WP 4.6 this value is used only internally.
+                                // Use $args' label_for to populate the id inside the callback.
+            __( 'Enable '.$element_name.' subscription', 'iotcat' ),
+        'iotcat_field_'.$element_name.'_enabled_cb',
+        'iotcat',
+        'iotcat_section_developers',
+        array(
+            'label_for'         => 'iotcat_field_'.$element_name.'_enabled',
+            'class'             => 'iotcat_row',
+            'iotcat_custom_data' => 'custom',
+        )
+    );
+     }
+
+     iotcat_add_element_enable_field("components");
+
      add_settings_field(
          'iotcat_field_components_singular', // As of WP 4.6 this value is used only internally.
                                  // Use $args' label_for to populate the id inside the callback.
@@ -197,6 +220,9 @@
              'iotcat_custom_data' => 'custom',
          )
      );
+
+
+     iotcat_add_element_enable_field("validations");     
      add_settings_field(
          'iotcat_field_validations_singular', // As of WP 4.6 this value is used only internally.
                                  // Use $args' label_for to populate the id inside the callback.
@@ -226,7 +252,7 @@
      add_settings_field(
       'iotcat_field_datasets_singular', // As of WP 4.6 this value is used only internally.
                               // Use $args' label_for to populate the id inside the callback.
-          __( 'dataset singular name', 'iotcat' ),
+          __( 'Dataset singular name', 'iotcat' ),
       'iotcat_field_datasets_singular_cb',
       'iotcat',
       'iotcat_section_developers',
@@ -239,7 +265,7 @@
   add_settings_field(
       'iotcat_field_datasets_plural', // As of WP 4.6 this value is used only internally.
                               // Use $args' label_for to populate the id inside the callback.
-          __( 'dataset plural name', 'iotcat' ),
+          __( 'Dataset plural name', 'iotcat' ),
       'iotcat_field_datasets_plural_cb',
       'iotcat',
       'iotcat_section_developers',
@@ -253,7 +279,7 @@
   add_settings_field(
     'iotcat_field_data_concepts_singular', // As of WP 4.6 this value is used only internally.
                             // Use $args' label_for to populate the id inside the callback.
-        __( 'data_concept singular name', 'iotcat' ),
+        __( 'Data concept singular name', 'iotcat' ),
     'iotcat_field_data_concepts_singular_cb',
     'iotcat',
     'iotcat_section_developers',
@@ -266,7 +292,7 @@
 add_settings_field(
     'iotcat_field_data_concepts_plural', // As of WP 4.6 this value is used only internally.
                             // Use $args' label_for to populate the id inside the callback.
-        __( 'data_concept plural name', 'iotcat' ),
+        __( 'Data concept plural name', 'iotcat' ),
     'iotcat_field_data_concepts_plural_cb',
     'iotcat',
     'iotcat_section_developers',
@@ -280,7 +306,7 @@ add_settings_field(
 add_settings_field(
   'iotcat_field_measurable_quantities_singular', // As of WP 4.6 this value is used only internally.
                           // Use $args' label_for to populate the id inside the callback.
-      __( 'measurable_quantity singular name', 'iotcat' ),
+      __( 'Measurable quantity singular name', 'iotcat' ),
   'iotcat_field_measurable_quantities_singular_cb',
   'iotcat',
   'iotcat_section_developers',
@@ -293,7 +319,7 @@ add_settings_field(
 add_settings_field(
   'iotcat_field_measurable_quantities_plural', // As of WP 4.6 this value is used only internally.
                           // Use $args' label_for to populate the id inside the callback.
-      __( 'measurable_quantity plural name', 'iotcat' ),
+      __( 'Measurable quantity plural name', 'iotcat' ),
   'iotcat_field_measurable_quantities_plural_cb',
   'iotcat',
   'iotcat_section_developers',
@@ -370,8 +396,26 @@ add_settings_field(
      <?php
  }
 
+  function iotcat_field_elements_enable_cb($args,$message){
+     //global $iotcat_default_components_singular_name;
+    // Get the value of the setting we've registered with register_setting()
+    $options = get_option( 'iotcat_options' );
+    ?>
+      <input type="checkbox" name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]" value="1"
+      <?php checked(  $options[ $args['label_for'] ] ??  "1", 1 ); ?> />
+      <p class="description">
+        <?php esc_html_e( $message, 'iotcat' ); ?>
+      </p>
 
+    <?php   
+  }
 
+  function iotcat_field_components_enabled_cb( $args ) {
+    iotcat_field_elements_enable_cb( $args ,'Enable subscriptions for components');
+  }
+  function iotcat_field_validations_enabled_cb( $args ) {
+    iotcat_field_elements_enable_cb( $args ,'Enable subscriptions for validations');
+  }
  function iotcat_field_components_singular_cb( $args ) {
    global $iotcat_default_components_singular_name;
      // Get the value of the setting we've registered with register_setting()
@@ -602,19 +646,13 @@ function iotcat_field_measurable_quantities_plural_cb( $args ) {
      <?php
  }
  function load_resources() {
-  /* wp_register_style( 'akismet.css', plugin_dir_url( __FILE__ ) . '_inc/akismet.css', array(), AKISMET_VERSION );
-   wp_enqueue_style( 'akismet.css');
 
-   wp_register_script( 'akismet.js', plugin_dir_url( __FILE__ ) . '_inc/akismet.js', array('jquery'), AKISMET_VERSION );
-   wp_enqueue_script( 'akismet.js' );*/
 
    wp_register_style( 'styles.css', plugin_dir_url( __FILE__ ) . 'css/styles.css', array(), "1.0" );
    wp_enqueue_style( 'styles.css');
 
    wp_register_script( 'main.js', plugin_dir_url( __FILE__ ) . 'js/main.js', array('jquery'), "1.0" );
    wp_enqueue_script( 'main.js' );
-  /* wp_enqueue_style( 'css',  __DIR__ . '/css/styles.cssz', array(), '1.0' );
-   wp_enqueue_script( 'js',  __DIR__ . '/js/main.jxs', array(), '1.0' );*/
 
  }
 add_action( 'admin_enqueue_scripts', 'load_resources' );
