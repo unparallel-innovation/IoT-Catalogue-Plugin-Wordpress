@@ -107,8 +107,17 @@
       $measurable_quantity_plural = $options["iotcat_field_measurable_quantities_plural"];
     }
 
-    $iotcat_field_components_enabled = $options["iotcat_field_components_enabled"]==="1"?$options["iotcat_field_components_enabled"]:"-1";
+
+    
+
+    $oldlevel = error_reporting(E_ALL & ~E_WARNING);
+    $iotcat_field_components_enabled =$options["iotcat_field_components_enabled"]==="1"?$options["iotcat_field_components_enabled"]:"-1";
     $iotcat_field_validations_enabled = $options["iotcat_field_validations_enabled"]==="1"?$options["iotcat_field_validations_enabled"]:"-1";
+
+    
+    error_reporting($oldlevel);
+
+
     return array_merge(
         $options
         ,array(
@@ -188,147 +197,63 @@
             'label_for'         => 'iotcat_field_'.$element_name.'_enabled',
             'class'             => 'iotcat_row',
             'iotcat_custom_data' => 'custom',
-        )
-    );
+          )
+      );
      }
 
-     iotcat_add_element_enable_field("components");
+     function iotcat_add_element_singular_field($element_name,$label){
+        add_settings_field(
+          'iotcat_field_'.$element_name.'_singular', // As of WP 4.6 this value is used only internally.
+                                  // Use $args' label_for to populate the id inside the callback.
+              __( $label.' singular name', 'iotcat' ),
+          'iotcat_field_'.$element_name.'_singular_cb',
+          'iotcat',
+          'iotcat_section_developers',
+          array(
+              'label_for'         => 'iotcat_field_'.$element_name.'_singular',
+              'class'             => 'iotcat_row',
+              'iotcat_custom_data' => 'custom',
+          )
+      );
+     }
 
-     add_settings_field(
-         'iotcat_field_components_singular', // As of WP 4.6 this value is used only internally.
-                                 // Use $args' label_for to populate the id inside the callback.
-             __( 'Component singular name', 'iotcat' ),
-         'iotcat_field_components_singular_cb',
-         'iotcat',
-         'iotcat_section_developers',
-         array(
-             'label_for'         => 'iotcat_field_components_singular',
-             'class'             => 'iotcat_row',
-             'iotcat_custom_data' => 'custom',
-         )
-     );
-     add_settings_field(
-         'iotcat_field_components_plural', // As of WP 4.6 this value is used only internally.
-                                 // Use $args' label_for to populate the id inside the callback.
-             __( 'Component plural name', 'iotcat' ),
-         'iotcat_field_components_plural_cb',
-         'iotcat',
-         'iotcat_section_developers',
-         array(
-             'label_for'         => 'iotcat_field_components_plural',
-             'class'             => 'iotcat_row',
-             'iotcat_custom_data' => 'custom',
-         )
-     );
+     function iotcat_add_element_plural_field($element_name,$label){
+        add_settings_field(
+          'iotcat_field_'.$element_name.'_plural', // As of WP 4.6 this value is used only internally.
+                                  // Use $args' label_for to populate the id inside the callback.
+              __( $label.' plural name', 'iotcat' ),
+          'iotcat_field_'.$element_name.'_plural_cb',
+          'iotcat',
+          'iotcat_section_developers',
+          array(
+              'label_for'         => 'iotcat_field_'.$element_name.'_plural',
+              'class'             => 'iotcat_row',
+              'iotcat_custom_data' => 'custom',
+          )
+      );
+     }
+
+      iotcat_add_element_enable_field("components");
+      iotcat_add_element_singular_field("components","Component");
+      iotcat_add_element_plural_field("components","Component");
 
 
-     iotcat_add_element_enable_field("validations");     
-     add_settings_field(
-         'iotcat_field_validations_singular', // As of WP 4.6 this value is used only internally.
-                                 // Use $args' label_for to populate the id inside the callback.
-             __( 'Validation singular name', 'iotcat' ),
-         'iotcat_field_validations_singular_cb',
-         'iotcat',
-         'iotcat_section_developers',
-         array(
-             'label_for'         => 'iotcat_field_validations_singular',
-             'class'             => 'iotcat_row',
-             'iotcat_custom_data' => 'custom',
-         )
-     );
-     add_settings_field(
-         'iotcat_field_validations_plural', // As of WP 4.6 this value is used only internally.
-                                 // Use $args' label_for to populate the id inside the callback.
-             __( 'Validation plural name', 'iotcat' ),
-         'iotcat_field_validations_plural_cb',
-         'iotcat',
-         'iotcat_section_developers',
-         array(
-             'label_for'         => 'iotcat_field_validations_plural',
-             'class'             => 'iotcat_row',
-             'iotcat_custom_data' => 'custom',
-         )
-     );
-     add_settings_field(
-      'iotcat_field_datasets_singular', // As of WP 4.6 this value is used only internally.
-                              // Use $args' label_for to populate the id inside the callback.
-          __( 'Dataset singular name', 'iotcat' ),
-      'iotcat_field_datasets_singular_cb',
-      'iotcat',
-      'iotcat_section_developers',
-      array(
-          'label_for'         => 'iotcat_field_datasets_singular',
-          'class'             => 'iotcat_row',
-          'iotcat_custom_data' => 'custom',
-      )
-  );
-  add_settings_field(
-      'iotcat_field_datasets_plural', // As of WP 4.6 this value is used only internally.
-                              // Use $args' label_for to populate the id inside the callback.
-          __( 'Dataset plural name', 'iotcat' ),
-      'iotcat_field_datasets_plural_cb',
-      'iotcat',
-      'iotcat_section_developers',
-      array(
-          'label_for'         => 'iotcat_field_datasets_plural',
-          'class'             => 'iotcat_row',
-          'iotcat_custom_data' => 'custom',
-      )
-  );
+      iotcat_add_element_enable_field("validations");    
+      iotcat_add_element_singular_field("validations","Validation"); 
+      iotcat_add_element_plural_field("validations","Validation"); 
 
-  add_settings_field(
-    'iotcat_field_data_concepts_singular', // As of WP 4.6 this value is used only internally.
-                            // Use $args' label_for to populate the id inside the callback.
-        __( 'Data concept singular name', 'iotcat' ),
-    'iotcat_field_data_concepts_singular_cb',
-    'iotcat',
-    'iotcat_section_developers',
-    array(
-        'label_for'         => 'iotcat_field_data_concepts_singular',
-        'class'             => 'iotcat_row',
-        'iotcat_custom_data' => 'custom',
-    )
-);
-add_settings_field(
-    'iotcat_field_data_concepts_plural', // As of WP 4.6 this value is used only internally.
-                            // Use $args' label_for to populate the id inside the callback.
-        __( 'Data concept plural name', 'iotcat' ),
-    'iotcat_field_data_concepts_plural_cb',
-    'iotcat',
-    'iotcat_section_developers',
-    array(
-        'label_for'         => 'iotcat_field_data_concepts_plural',
-        'class'             => 'iotcat_row',
-        'iotcat_custom_data' => 'custom',
-    )
-);
 
-add_settings_field(
-  'iotcat_field_measurable_quantities_singular', // As of WP 4.6 this value is used only internally.
-                          // Use $args' label_for to populate the id inside the callback.
-      __( 'Measurable quantity singular name', 'iotcat' ),
-  'iotcat_field_measurable_quantities_singular_cb',
-  'iotcat',
-  'iotcat_section_developers',
-  array(
-      'label_for'         => 'iotcat_field_measurable_quantities_singular',
-      'class'             => 'iotcat_row',
-      'iotcat_custom_data' => 'custom',
-  )
-);
-add_settings_field(
-  'iotcat_field_measurable_quantities_plural', // As of WP 4.6 this value is used only internally.
-                          // Use $args' label_for to populate the id inside the callback.
-      __( 'Measurable quantity plural name', 'iotcat' ),
-  'iotcat_field_measurable_quantities_plural_cb',
-  'iotcat',
-  'iotcat_section_developers',
-  array(
-      'label_for'         => 'iotcat_field_measurable_quantities_plural',
-      'class'             => 'iotcat_row',
-      'iotcat_custom_data' => 'custom',
-  )
-);
+      iotcat_add_element_singular_field("datasets","Dataset"); 
+      iotcat_add_element_plural_field("datasets","Dataset"); 
+
+
+      iotcat_add_element_singular_field("data_concepts", "Data concept"); 
+      iotcat_add_element_plural_field("data_concepts", "Data concept"); 
+
+      iotcat_add_element_singular_field("measurable_quantities","Measurable quantity"); 
+      iotcat_add_element_plural_field("measurable_quantities","Measurable quantity"); 
+
+
 
  }
 
@@ -399,7 +324,10 @@ add_settings_field(
   function iotcat_field_elements_enable_cb($args,$message){
      //global $iotcat_default_components_singular_name;
     // Get the value of the setting we've registered with register_setting()
+    
+
     $options = get_option( 'iotcat_options' );
+
     ?>
       <input type="checkbox" name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]" value="1"
       <?php checked(  $options[ $args['label_for'] ] ??  "1", 1 ); ?> />
