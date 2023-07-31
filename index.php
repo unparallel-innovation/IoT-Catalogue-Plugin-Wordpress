@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       IoT Catalogue Integration
  * Description:       Display in WordPress content from IoT Catalogue
- * Version:           1.7.0
+ * Version:           1.8.0
  * Author:            UNPARALLEL Innovation, Lda
  * Author URI:        https://www.unparallel.pt
  */
@@ -37,7 +37,9 @@
   require_once  __DIR__ . '/includes/iotcat_data_concepts.php';
   require_once  __DIR__ . '/includes/iotcat_measurable_quantities.php';
 
-$iotcat_base_url = "https://www.iot-catalogue.com";
+
+
+
 
 
 $iotcat_field_data_update_interval =  get_option( 'iotcat_options' )["iotcat_field_data_update_interval"] ??$iotcat_default_data_update_interval;
@@ -82,7 +84,6 @@ $iotcat_measurable_quantities = new IoTCat_measurable_quantities($iotcat_measura
 function iotcat_get_element_instances(){
   global $iotcat_components,$iotcat_validations,$iotcat_datasets,$iotcat_data_concepts,$iotcat_measurable_quantities;
   $element_instances = array();
-
   $iotcat_components_enabled = get_option( 'iotcat_options' )["iotcat_field_components_enabled"]!=="-1" ;
   if($iotcat_components_enabled){
     array_push( $element_instances ,$iotcat_components);
@@ -91,19 +92,32 @@ function iotcat_get_element_instances(){
   if($iotcat_validations_enabled){
     array_push(  $element_instances ,$iotcat_validations);
   }
-
+  $iotcat_field_datasets_enabled = get_option( 'iotcat_options' )["iotcat_field_datasets_enabled"]!=="-1" ;
+  if($iotcat_field_datasets_enabled){
+    array_push(  $element_instances ,$iotcat_datasets);
+  }
+  $iotcat_field_data_concepts_enabled = get_option( 'iotcat_options' )["iotcat_field_data_concepts_enabled"]!=="-1" ;
+  if($iotcat_field_data_concepts_enabled){
+    array_push(  $element_instances ,$iotcat_data_concepts);
+  }
+  $iotcat_field_measurable_quantities_enabled = get_option( 'iotcat_options' )["iotcat_field_measurable_quantities_enabled"]!=="-1" ;
+  if($iotcat_field_measurable_quantities_enabled){
+    array_push(  $element_instances ,$iotcat_measurable_quantities);
+  }
   return  $element_instances;
 }
-
+function iotcat_get_base_url(){
+  global $iotcat_default_base_url;
+  return get_option( 'iotcat_options' )["iotcat_field_base_url"] ??$iotcat_default_base_url;
+}
 
 function iotcat_added_option($option, $value){
-  global $iotcat_base_url;
   if($option === "iotcat_options"){
-    global $iotcat_components,$iotcat_validations,$iotcat_datasets,$iotcat_data_concepts,$iotcat_measurable_quantities;
+    global $iotcat_components,$iotcat_validations,$iotcat_datasets,$iotcat_data_concepts,$iotcat_measurable_quantities,$iotcat_default_base_url;
     if(array_key_exists("iotcat_field_token", $value)){
       $token = $value["iotcat_field_token"];
       if($token){
-        $iotcat_subscription = new IoTCat_subscription($token,iotcat_get_element_instances(),$iotcat_base_url);
+        $iotcat_subscription = new IoTCat_subscription($token,iotcat_get_element_instances(),iotcat_get_base_url());
         update_option( 'iotcat_subscription_instance', $iotcat_subscription);
         iotcat_sync_data($iotcat_subscription);
       }
@@ -128,16 +142,17 @@ function iotcat_destroy_current_subscription(){
 }
 
 
+
 function iotcat_updated_option($option, $old_value,$value){
 
-  global $iotcat_base_url;
   if($option === "iotcat_options"){
     iotcat_destroy_current_subscription();
     if(array_key_exists("iotcat_field_token", $value)){
       $token = $value["iotcat_field_token"];
       if($token){
-        global $iotcat_components,$iotcat_validations,$iotcat_datasets,$iotcat_data_concepts,$iotcat_measurable_quantities;
-        $iotcat_subscription = new IoTCat_subscription($token,iotcat_get_element_instances(),$iotcat_base_url);
+        global $iotcat_components,$iotcat_validations,$iotcat_datasets,$iotcat_data_concepts,$iotcat_measurable_quantities;$iotcat_default_base_url;
+        
+        $iotcat_subscription = new IoTCat_subscription($token,iotcat_get_element_instances(),iotcat_get_base_url());
         update_option( 'iotcat_subscription_instance', $iotcat_subscription);
         iotcat_sync_data($iotcat_subscription);
       }

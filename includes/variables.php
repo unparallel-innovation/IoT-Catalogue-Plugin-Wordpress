@@ -1,6 +1,8 @@
 <?php
 
 	$iotcat_default_data_update_interval = "10";
+	
+	$iotcat_default_base_url = "https://www.iot-catalogue.com";
 
 	$iotcat_default_components_singular_name = "Component";
 	$iotcat_default_components_plural_name = "Components";

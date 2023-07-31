@@ -145,12 +145,15 @@ class IoTCat_elements {
 		if(isset($website) && $website !== ""){
 
 			$parse = parse_url($website);
-			$host = $parse['host'];
-			return "
-			<div class=\"iotcat-element-info-box\">
-				<b class=\"label\">Website: </b><a href=\"$website\" target=\"_blank\">$host</a>
-			</div>
-			";
+			if( is_array($parse) &&  array_key_exists("host", $parse)){
+				$host = $parse['host'];
+				return "
+				<div class=\"iotcat-element-info-box\">
+					<b class=\"label\">Website: </b><a href=\"$website\" target=\"_blank\">$host</a>
+				</div>
+				";
+			}
+
 		}
 		return "";
 	}

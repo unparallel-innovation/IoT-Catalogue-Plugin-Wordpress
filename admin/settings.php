@@ -13,7 +13,8 @@
 
   function iotcat_options_handler($options)
   {
-    global $iotcat_default_components_singular_name, 
+    global $iotcat_default_base_url,
+    $iotcat_default_components_singular_name, 
     $iotcat_default_components_plural_name,
 
     $iotcat_default_validations_plural_name,
@@ -46,12 +47,14 @@
       $data_update_interval = $options["iotcat_field_data_update_interval"];
     }
 
-
+    $base_url = $iotcat_default_base_url;
     $component_singular = $iotcat_default_components_singular_name;
     $component_plural = $iotcat_default_components_plural_name;
 
 
-
+    if(array_key_exists("iotcat_field_base_url", $options) &&  $options["iotcat_field_base_url"]){
+      $base_url = $options["iotcat_field_base_url"];
+    }
 
     if(array_key_exists("iotcat_field_components_singular", $options) &&  $options["iotcat_field_components_singular"]){
       $component_singular = $options["iotcat_field_components_singular"];
@@ -114,7 +117,10 @@
     $iotcat_field_components_enabled =$options["iotcat_field_components_enabled"]==="1"?$options["iotcat_field_components_enabled"]:"-1";
     $iotcat_field_validations_enabled = $options["iotcat_field_validations_enabled"]==="1"?$options["iotcat_field_validations_enabled"]:"-1";
 
-    
+    $iotcat_field_datasets_enabled = $options["iotcat_field_datasets_enabled"]==="1"?$options["iotcat_field_datasets_enabled"]:"-1";
+    $iotcat_field_data_concepts_enabled = $options["iotcat_field_data_concepts_enabled"]==="1"?$options["iotcat_field_data_concepts_enabled"]:"-1";
+    $iotcat_field_measurable_quantities_enabled = $options["iotcat_field_measurable_quantities_enabled"]==="1"?$options["iotcat_field_measurable_quantities_enabled"]:"-1";
+
     error_reporting($oldlevel);
 
 
@@ -123,24 +129,29 @@
         ,array(
           "iotcat_field_data_update_interval"=>$data_update_interval,
           "iotcat_field_components_enabled"=>$iotcat_field_components_enabled ,
-          "iotcat_field_validations_enabled"=>$iotcat_field_validations_enabled ,
+
           "iotcat_field_components_singular"=>$component_singular ,
           "iotcat_field_components_plural"=>$component_plural,
+          "iotcat_field_validations_enabled"=>$iotcat_field_validations_enabled ,
           "iotcat_field_validations_singular"=>$validation_singular ,
           "iotcat_field_validations_plural"=>$validation_plural,
+          "iotcat_field_datasets_enabled"=>$iotcat_field_datasets_enabled ,
           "iotcat_field_datasets_singular"=>$dataset_singular ,
           "iotcat_field_datasets_plural"=>$dataset_plural,
+          "iotcat_field_data_concepts_enabled"=>$iotcat_field_data_concepts_enabled ,
           "iotcat_field_data_concepts_singular"=>$data_concept_singular ,
           "iotcat_field_data_concepts_plural"=>$data_concept_plural,
+          "iotcat_field_measurable_quantities_enabled"=>$iotcat_field_measurable_quantities_enabled ,
           "iotcat_field_measurable_quantities_singular"=>$measurable_quantity_singular ,
-          "iotcat_field_measurable_quantities_plural"=>$measurable_quantity_plural
+          "iotcat_field_measurable_quantities_plural"=>$measurable_quantity_plural,
+          "iotcat_field_base_url"=>$base_url
         )
       );
 
    }
 
  function iotcat_settings_init() {
-
+    global $iotcat_default_base_url;
      // Register a new setting for "iotcat" page.
      register_setting( 'iotcat', 'iotcat_options','iotcat_options_handler' );
 
@@ -185,11 +196,11 @@
          )
      );
 
-     function iotcat_add_element_enable_field($element_name){
+     function iotcat_add_element_enable_field($element_name,$label){
       add_settings_field(
         'iotcat_field_'.$element_name.'_enabled', // As of WP 4.6 this value is used only internally.
                                 // Use $args' label_for to populate the id inside the callback.
-            __( 'Enable '.$element_name.' subscription', 'iotcat' ),
+            __( 'Enable '.$label.' subscription', 'iotcat' ),
         'iotcat_field_'.$element_name.'_enabled_cb',
         'iotcat',
         'iotcat_section_developers',
@@ -233,23 +244,45 @@
       );
      }
 
-      iotcat_add_element_enable_field("components");
+
+
+
+    $show_advanced_settings = false;
+    $options = get_option( 'iotcat_options' );
+
+
+      if(array_key_exists("iotcat_field_base_url", $options) &&  $options["iotcat_field_base_url"]!==$iotcat_default_base_url ||  array_key_exists("advanced_settings",$_GET) ){
+        add_settings_field(
+          'iotcat_field_base_url',
+          __( 'Base url of IoT Catalogue instance', 'iotcat' ),
+          'iotcat_field_base_url_cb',
+          'iotcat',
+          'iotcat_section_developers',
+          array(
+            'label_for'         => 'iotcat_field_base_url',
+            'class'             => 'iotcat_row',
+            'iotcat_custom_data' => 'custom',
+          )
+        );
+      }
+      iotcat_add_element_enable_field("components","components");
       iotcat_add_element_singular_field("components","Component");
       iotcat_add_element_plural_field("components","Component");
 
 
-      iotcat_add_element_enable_field("validations");    
+      iotcat_add_element_enable_field("validations","validations");    
       iotcat_add_element_singular_field("validations","Validation"); 
       iotcat_add_element_plural_field("validations","Validation"); 
 
-
+      iotcat_add_element_enable_field("datasets","datasets");  
       iotcat_add_element_singular_field("datasets","Dataset"); 
       iotcat_add_element_plural_field("datasets","Dataset"); 
 
-
+      iotcat_add_element_enable_field("data_concepts","data concepts");  
       iotcat_add_element_singular_field("data_concepts", "Data concept"); 
       iotcat_add_element_plural_field("data_concepts", "Data concept"); 
 
+      iotcat_add_element_enable_field("measurable_quantities","measurable quantities");  
       iotcat_add_element_singular_field("measurable_quantities","Measurable quantity"); 
       iotcat_add_element_plural_field("measurable_quantities","Measurable quantity"); 
 
@@ -320,8 +353,22 @@
 
      <?php
  }
+ function iotcat_field_base_url_cb( $args ) {
+  // Get the value of the setting we've registered with register_setting()
+  global $iotcat_default_base_url;
+  $options = get_option( 'iotcat_options' );
+  ?>
+  <input
+   name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+   value="<?php echo $options[ $args['label_for'] ] ?? $iotcat_default_base_url; ?>"
+ />
+ <p class="description">
+ <?php esc_html_e( 'IoT Catalogue URL', 'iotcat' ); ?>
+ </p>
 
-  function iotcat_field_elements_enable_cb($args,$message){
+  <?php
+}
+  function iotcat_field_elements_enable_cb($args,$plural_element_name){
      //global $iotcat_default_components_singular_name;
     // Get the value of the setting we've registered with register_setting()
     
@@ -332,186 +379,121 @@
       <input type="checkbox" name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]" value="1"
       <?php checked(  $options[ $args['label_for'] ] ??  "1", 1 ); ?> />
       <p class="description">
-        <?php esc_html_e( $message, 'iotcat' ); ?>
+        <?php esc_html_e( 'Enable subscriptions for '.$plural_element_name, 'iotcat' ); ?>
       </p>
 
     <?php   
   }
 
+
+
+  function iotcat_field_elements_singular_cb( $args,$element_singular_name,$singular_name ) {
+      // Get the value of the setting we've registered with register_setting()
+      $options = get_option( 'iotcat_options' );
+      ?>
+      <input
+       name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+       value="<?php echo $options[ $args['label_for'] ] ?? $singular_name ; ?>"
+     />
+     <p class="description">
+        <?php esc_html_e( 'Singular name for '.$element_singular_name.' post type.', 'iotcat' ); ?>
+     </p>
+ 
+      <?php
+  }
+
+  function iotcat_field_elements_plural_cb( $args,$element_singular_name,$singular_name ) {
+      // Get the value of the setting we've registered with register_setting()
+      $options = get_option( 'iotcat_options' );
+      ?>
+      <input
+      name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+      value="<?php echo $options[ $args['label_for'] ] ?? $singular_name; ?>"
+    />
+    <p class="description">
+      <?php esc_html_e( 'Plural name for '.$element_singular_name.' post type.', 'iotcat' ); ?>
+    </p>
+ 
+      <?php
+  }
+
   function iotcat_field_components_enabled_cb( $args ) {
-    iotcat_field_elements_enable_cb( $args ,'Enable subscriptions for components');
+    iotcat_field_elements_enable_cb( $args ,'components');
   }
-  function iotcat_field_validations_enabled_cb( $args ) {
-    iotcat_field_elements_enable_cb( $args ,'Enable subscriptions for validations');
-  }
+
  function iotcat_field_components_singular_cb( $args ) {
    global $iotcat_default_components_singular_name;
-     // Get the value of the setting we've registered with register_setting()
-     $options = get_option( 'iotcat_options' );
-     ?>
-     <input
-  		name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-  		value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_components_singular_name; ?>"
-  	/>
-  	<p class="description">
-  	   <?php esc_html_e( 'Singular name for component post type.', 'iotcat' ); ?>
-  	</p>
-
-     <?php
+   iotcat_field_elements_singular_cb($args,"component",$iotcat_default_components_singular_name);
  }
 
 
  function iotcat_field_components_plural_cb( $args ) {
    global $iotcat_default_components_plural_name;
-     // Get the value of the setting we've registered with register_setting()
-     $options = get_option( 'iotcat_options' );
-     ?>
-     <input
-     name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-     value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_components_plural_name; ?>"
-   />
-   <p class="description">
-     <?php esc_html_e( 'Plural name for component post type.', 'iotcat' ); ?>
-   </p>
+   iotcat_field_elements_plural_cb($args,"component",$iotcat_default_components_plural_name);
 
-     <?php
  }
 
-
+  function iotcat_field_validations_enabled_cb( $args ) {
+    iotcat_field_elements_enable_cb( $args ,'validations');
+  }
  function iotcat_field_validations_singular_cb( $args ) {
    global $iotcat_default_validations_singular_name;
-     // Get the value of the setting we've registered with register_setting()
-     $options = get_option( 'iotcat_options' );
-     ?>
-     <input
-  		name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-  		value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_validations_singular_name; ?>"
-  	/>
-  	<p class="description">
-  	   <?php esc_html_e( 'Singular name for validation post type.', 'iotcat' ); ?>
-  	</p>
+   iotcat_field_elements_singular_cb($args,"validation",$iotcat_default_validations_singular_name);
 
-     <?php
  }
 
 
  function iotcat_field_validations_plural_cb( $args ) {
    global $iotcat_default_validations_plural_name;
-
-     // Get the value of the setting we've registered with register_setting()
-     $options = get_option( 'iotcat_options' );
-     ?>
-     <input
-     name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-     value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_validations_plural_name; ?>"
-   />
-   <p class="description">
-     <?php esc_html_e( 'Plural name for validation post type.', 'iotcat' ); ?>
-   </p>
-
-     <?php
+   iotcat_field_elements_plural_cb($args,"validation",$iotcat_default_validations_plural_name);
  }
 
+ function iotcat_field_datasets_enabled_cb( $args ) {
+  iotcat_field_elements_enable_cb( $args ,'datasets');
+}
  function iotcat_field_datasets_singular_cb( $args ) {
   global $iotcat_default_datasets_singular_name;
-    // Get the value of the setting we've registered with register_setting()
-    $options = get_option( 'iotcat_options' );
-    ?>
-    <input
-     name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-     value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_datasets_singular_name; ?>"
-   />
-   <p class="description">
-      <?php esc_html_e( 'Singular name for dataset post type.', 'iotcat' ); ?>
-   </p>
+  iotcat_field_elements_singular_cb($args,"dataset",$iotcat_default_datasets_singular_name);
 
-    <?php
 }
 
 
 function iotcat_field_datasets_plural_cb( $args ) {
   global $iotcat_default_datasets_plural_name;
-
-    // Get the value of the setting we've registered with register_setting()
-    $options = get_option( 'iotcat_options' );
-    ?>
-    <input
-    name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-    value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_datasets_plural_name; ?>"
-  />
-  <p class="description">
-    <?php esc_html_e( 'Plural name for dataset post type.', 'iotcat' ); ?>
-  </p>
-
-    <?php
+  iotcat_field_elements_plural_cb($args,"dataset",$iotcat_default_datasets_plural_name);
 }
 
+function iotcat_field_data_concepts_enabled_cb( $args ) {
+  iotcat_field_elements_enable_cb( $args ,'data concepts');
+}
 function iotcat_field_data_concepts_singular_cb( $args ) {
   global $iotcat_default_data_concepts_singular_name;
-    // Get the value of the setting we've registered with register_setting()
-    $options = get_option( 'iotcat_options' );
-    ?>
-    <input
-     name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-     value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_data_concepts_singular_name; ?>"
-   />
-   <p class="description">
-      <?php esc_html_e( 'Singular name for data_concept post type.', 'iotcat' ); ?>
-   </p>
+  iotcat_field_elements_singular_cb($args,"data concept",$iotcat_default_data_concepts_singular_name);
 
-    <?php
 }
 
 
 function iotcat_field_data_concepts_plural_cb( $args ) {
   global $iotcat_default_data_concepts_plural_name;
+  iotcat_field_elements_plural_cb($args,"data concepts",$iotcat_default_data_concepts_plural_name);
 
-    // Get the value of the setting we've registered with register_setting()
-    $options = get_option( 'iotcat_options' );
-    ?>
-    <input
-    name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-    value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_data_concepts_plural_name; ?>"
-  />
-  <p class="description">
-    <?php esc_html_e( 'Plural name for data_concept post type.', 'iotcat' ); ?>
-  </p>
+}
 
-    <?php
+function iotcat_field_measurable_quantities_enabled_cb( $args ) {
+  iotcat_field_elements_enable_cb( $args ,'measurable quantities');
 }
 
 function iotcat_field_measurable_quantities_singular_cb( $args ) {
   global $iotcat_default_measurable_quantities_singular_name;
-    // Get the value of the setting we've registered with register_setting()
-    $options = get_option( 'iotcat_options' );
-    ?>
-    <input
-     name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-     value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_measurable_quantities_singular_name; ?>"
-   />
-   <p class="description">
-      <?php esc_html_e( 'Singular name for measurable_quantity post type.', 'iotcat' ); ?>
-   </p>
+  iotcat_field_elements_singular_cb($args,"measurable quantity",$iotcat_default_measurable_quantities_singular_name);
 
-    <?php
 }
 
 
 function iotcat_field_measurable_quantities_plural_cb( $args ) {
   global $iotcat_default_measurable_quantities_plural_name;
+  iotcat_field_elements_plural_cb($args,"measurable quantity",$iotcat_default_measurable_quantities_plural_name);
 
-    // Get the value of the setting we've registered with register_setting()
-    $options = get_option( 'iotcat_options' );
-    ?>
-    <input
-    name="iotcat_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-    value="<?php echo $options[ $args['label_for'] ] ??  $iotcat_default_measurable_quantities_plural_name; ?>"
-  />
-  <p class="description">
-    <?php esc_html_e( 'Plural name for measurable_quantity post type.', 'iotcat' ); ?>
-  </p>
-
-    <?php
 }
  /**
   * Add the top level menu page.
