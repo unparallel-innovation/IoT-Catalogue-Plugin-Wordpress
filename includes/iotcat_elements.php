@@ -69,12 +69,12 @@ class IoTCat_elements {
 
 
 		if(
-			array_key_exists("page_id",$query_vars) &&
+			array_key_exists("iotcat_page_id",$_GET) &&
 			array_key_exists("post_type",$query_vars) &&
 			$query_vars["post_type"] === $this->post_type
 		){
 
-					$element = $this->get_element_by_original_id($query_vars["page_id"]);
+					$element = $this->get_element_by_original_id($_GET["iotcat_page_id"]);
 					if($element !==null){
 						$permalink = get_permalink($element);
 						wp_redirect($permalink);
