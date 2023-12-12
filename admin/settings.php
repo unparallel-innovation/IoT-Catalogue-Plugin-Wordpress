@@ -251,7 +251,7 @@
     $options = get_option( 'iotcat_options' );
 
 
-      if(array_key_exists("iotcat_field_base_url", $options) &&  $options["iotcat_field_base_url"]!==$iotcat_default_base_url ||  array_key_exists("advanced_settings",$_GET) ){
+      if(gettype($options)=== "array" && array_key_exists("iotcat_field_base_url", $options) &&  $options["iotcat_field_base_url"]!==$iotcat_default_base_url ||  array_key_exists("advanced_settings",$_GET) ){
         add_settings_field(
           'iotcat_field_base_url',
           __( 'Base url of IoT Catalogue instance', 'iotcat' ),
