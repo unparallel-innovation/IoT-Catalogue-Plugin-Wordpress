@@ -111,6 +111,63 @@ class IoTCat_components  extends IoTCat_elements{
 		return ($wp_join);
 	}
 
+	protected function render_entity_names($entities){
+		if(gettype($entities)!== "array") return "";
+		$filtered_entities = array_filter($entities,function($var){
+			return array_key_exists("name", $var);
+		});
+
+		if(count($filtered_entities) === 0) return "";
+		$names_html = "";
+		for($i=0;$i<count($filtered_entities);$i++){
+			$name = $filtered_entities[$i]["name"];
+			$website = $filtered_entities[$i]["website"];
+			$name_html = "<a target=\"_blank\" href=\"$website\" >$name</a>";
+			$names_html = $names_html."$name_html";
+			if($i< count($filtered_entities) - 1){
+				$names_html = $names_html.", ";
+			}
+		}
+
+		return "
+		<div class=\"iotcat-element-info-box\">
+			<b class=\"label\">Developers</b>$names_html
+		</div>
+		";
+	}
+
+
+	protected function render_license_name($original_object){
+		if(!array_key_exists("_license", $original_object)) return "";
+		$license = $original_object["_license"];
+		return "
+		<div class=\"iotcat-element-info-box\">
+			<b class=\"label\">License</b>$license
+		</div>
+		";
+	}
+
+	protected function get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path,$original_object){
+		$trl = array_key_exists("_trl", $original_object) ?$original_object["_trl"]:"";
+		$trl_html = "";
+		if($trl != ""){
+			$trl_html ="<div class=\"iotcat-element-info-box\">
+						<b class=\"label\">TRL</b>$trl
+						</div>";
+		}
+
+		return
+		"<p>$description</p>".
+		"$trl_html".
+		$this->render_entity_names($original_object["_manufacturers"]).
+		$this->render_entity_names($original_object["_developers"]).
+		$this->render_license_name($original_object).
+		$this->get_tags_elements($tags_path).
+		$this->get_website_link($website);
+
+
+	}
+
 	function set_default_sort($orderby,&$query) {
 		global $wpdb;
 		if(get_query_var('post_type') == $this->post_type) {

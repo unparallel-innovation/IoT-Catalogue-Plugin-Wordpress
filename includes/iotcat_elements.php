@@ -140,7 +140,7 @@ class IoTCat_elements {
 		return "";
 	}
 
-	private function get_website_link($website){
+	protected function get_website_link($website){
 
 		if(isset($website) && $website !== ""){
 
@@ -172,20 +172,23 @@ class IoTCat_elements {
 		return $tag_input;
 	}
 
-	private function get_tags_elements($tags_path){
+	protected function get_tags_elements($tags_path){
 
-		return "<div class=\"iotcat-tags-container-new mt-4\"><!-- wp:post-terms {\"term\":\"post_tag\",\"textAlign\":\"center\",\"separator\":\"  \",\"style\":{\"typography\":{\"fontStyle\":\"normal\",\"fontWeight\":\"200\"}},\"fontSize\":\"medium\"} /--></div>";
+		//return "<div class=\"iotcat-tags-container-new mt-4\"><!-- wp:post-terms {\"term\":\"post_tag\",\"textAlign\":\"center\",\"separator\":\"  \",\"style\":{\"typography\":{\"fontStyle\":\"normal\",\"fontWeight\":\"200\"}},\"fontSize\":\"medium\"} /--></div>";
 		$html = "";
 		if(isset($tags_path) && $tags_path !== null){
 			$tag_elements = array();
 			foreach($tags_path as $tag_path){
 				if(count($tag_path)>0){
-					$tag_name = $tag_path[0]["name"];
+					$tag =array("name"=> $tag_path[0]["name"]);
+					if(count($tag_path) > 1){
+						$tag["parent"] = $tag_path[1]["name"];
+					}
 					$tag_type_name = $tag_path[0]["typeName"];
 					if(!array_key_exists($tag_type_name,$tag_elements)){
 						$tag_elements[$tag_type_name] = array();
 					}
-					array_push($tag_elements[$tag_type_name],$tag_name);
+					array_push($tag_elements[$tag_type_name],$tag);
 
 				}
 
@@ -194,10 +197,16 @@ class IoTCat_elements {
 			asort($tag_type_names);
 			foreach($tag_type_names as $tag_type_name){
 				$tags_html = "";
-				$tag_names = $tag_elements[$tag_type_name];
-				asort($tag_names);
-				foreach($tag_names as $tag_name){
-					$tags_html = $tags_html."<span class=\"iotcat-element-tag\">$tag_name</span>";
+				$tags = $tag_elements[$tag_type_name];
+
+				//asort($tag_names);
+				foreach($tags as $tag){
+					$parent = "";
+					if(array_key_exists("parent",$tag)){
+						$parent =  "<span class=\"iotcat-element-tag-parent\">".$tag["parent"]."</span>";
+					}
+
+					$tags_html = $tags_html."<span class=\"iotcat-element-tag\">".$parent.$tag["name"]."</span>";
 				}
 				if($tags_html !== ""){
 					$html = $html."
@@ -212,14 +221,21 @@ class IoTCat_elements {
 	}
 
 
-	protected function get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path){
-		
-		$url = $this->should_post_process_iframe_url?"":$embedded_url;
-		
+	protected function get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path,$original_object){
 		return
 		"<p>$description</p>".
 		$this->get_tags_elements($tags_path).
-		$this->get_website_link($website).
+		$this->get_website_link($website);
+
+
+	}
+
+
+	protected function get_page_content_with_iframe($name,$description,$website,$embedded_url, $image_url,$tags_path,$original_object){
+		
+		$url = $this->should_post_process_iframe_url?"":$embedded_url;
+		return
+		$this->get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path,$original_object).
 		"<iframe id=\"iotcat-iframe\"  data-url=\"$embedded_url\" style=\"height: 0px;width: 100%\" src=\"$url\" ></iframe>";
 
 
@@ -259,13 +275,17 @@ class IoTCat_elements {
 									}
 
 									.iotcat-element-tag {
-								    border: 1px solid #cdced0;
-								    color: #494949;
-								    padding: 2px 5px;
-								    margin-right: 5px;
-								    border-radius: 2px;
+										border: 1px solid #cdced0;
+										color: #494949;
+										padding: 2px 5px;
+										margin-right: 5px;
+								    	border-radius: 2px;
 									}
-
+									.iotcat-element-tag-parent {
+										margin-right: 5px;
+										border-right: 1px solid #cdced0;
+										padding-right: 5px;
+									}
 									.iotcat-tags-container-new{
 										margin-bottom: 1rem;
 									}
@@ -392,8 +412,7 @@ class IoTCat_elements {
 		wp_delete_post($id);
 	}
 
-	private function create_post_element($id,	$name, $description,$website, $embedded_url, $image_url,$tags_path,$original_id,$subscription_id,$last_update_timestamp){
-
+	private function create_post_element($id,	$name, $description,$website, $embedded_url, $image_url,$tags_path,$original_id,$subscription_id,$last_update_timestamp,$original_object){
 
 		$meta_input = array_merge(
 			$this->default_metadata,
@@ -408,7 +427,7 @@ class IoTCat_elements {
 		$element = array(
 					'post_title'    => $name,
 					'post_status'   => 'publish',
-					'post_content' => $this->get_page_content($name,$description,$website,$embedded_url, $image_url,$tags_path),
+					'post_content' => $this->get_page_content_with_iframe($name,$description,$website,$embedded_url, $image_url,$tags_path,$original_object),
 					'tags_input' => $this->get_tags_input($tags_path),
 					'post_type'     => $this->post_type,
 					'meta_input' => $meta_input
@@ -475,10 +494,10 @@ class IoTCat_elements {
 		return $attach_id;
 	}
 
-	public function add_new_element($name,$description, $website, $embedded_url,$image_url,$tags_path,$original_id,$last_update_timestamp,$subscription_id, $insert_repeated = false){
+	public function add_new_element($name,$description, $website, $embedded_url,$image_url,$tags_path,$original_id,$last_update_timestamp,$subscription_id,$original_object, $insert_repeated = false){
 
 		if($insert_repeated || !$this->has_element($original_id)){
-						$id = wp_insert_post( $this->create_post_element(null, $name,$description,$website,$embedded_url,$image_url,$tags_path,$original_id,$subscription_id,  $last_update_timestamp ) );
+						$id = wp_insert_post( $this->create_post_element(null, $name,$description,$website,$embedded_url,$image_url,$tags_path,$original_id,$subscription_id,  $last_update_timestamp ,$original_object) );
 						$attachment_id = $this->add_element_image($id,$image_url);
 						if(!is_null($attachment_id)){
 							add_post_meta($id,"_image_attachment_id",$attachment_id );
@@ -488,10 +507,10 @@ class IoTCat_elements {
 		}
 	}
 
-	public function update_element($id,$name,$description,$website,  $embedded_url,$image_url,$tags_path,$original_id,$last_update_timestamp,$subscription_id){
+	public function update_element($id,$name,$description,$website,  $embedded_url,$image_url,$tags_path,$original_id,$last_update_timestamp,$subscription_id,$original_object){
 
     iotcat_log_me("update $this->post_type $name");
-		return wp_update_post( $this->create_post_element($id, $name,$description,$website,$embedded_url,$image_url,$tags_path,$original_id,$subscription_id,  $last_update_timestamp ) );
+		return wp_update_post( $this->create_post_element($id, $name,$description,$website,$embedded_url,$image_url,$tags_path,$original_id,$subscription_id,  $last_update_timestamp ,$original_object) );
 	}
 
 }

@@ -81,7 +81,8 @@
 											array_key_exists("_tagsPath", $element) ?$element["_tagsPath"]:null,
 											array_key_exists("_id", $element) ?$element["_id"]:"",
 											array_key_exists("_lastUpdateTimestamp", $element) ? round( $element["_lastUpdateTimestamp"]/1000):0,
-											$this->id
+											$this->id,
+											$element
 										);
 									} catch (Exception $e) {
 										iotcat_log_me("Failed to update element");
@@ -106,7 +107,8 @@
 												array_key_exists("_tagsPath", $element) ?$element["_tagsPath"]:null,
 												array_key_exists("_id", $element) ?$element["_id"]:"",
 												array_key_exists("_lastUpdateTimestamp", $element) ? round( $element["_lastUpdateTimestamp"]/1000):0,
-												$this->id
+												$this->id,
+												$element 
 											);
 								}
 							} catch (Exception $e) {
