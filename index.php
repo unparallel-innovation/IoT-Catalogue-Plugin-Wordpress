@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       IoT Catalogue Integration
  * Description:       Display in WordPress content from IoT Catalogue
- * Version:           1.10.0-1
+ * Version:           1.10.0-2
  * Author:            UNPARALLEL Innovation, Lda
  * Author URI:        https://www.unparallel.pt
  */
@@ -73,7 +73,7 @@ $iotcat_data_concepts_um_content_restriction = get_option( 'iotcat_options' )["i
 $iotcat_measurable_quantities_um_content_restriction = get_option( 'iotcat_options' )["iotcat_measurable_quantities_um_content_restriction"] ??$iotcat_default_measurable_quantities_um_content_restriction;
 
 $iotcat_components =  new IoTCat_components($iotcat_components_plural_name, $iotcat_components_singular_name,array("um_content_restriction"=>$iotcat_components_um_content_restriction ),$iotcat_components_comment_status );
-$iotcat_validations = new IoTCat_validations($iotcat_validations_plural_name,$iotcat_validations_singular_name,array("um_content_restriction"=>$iotcat_validations_um_content_restriction ),$iotcat_validations_comment_status );
+$iotcat_validations = new IoTCat_validations($iotcat_validations_plural_name, $iotcat_validations_singular_name, array("um_content_restriction"=>$iotcat_validations_um_content_restriction ),$iotcat_validations_comment_status );
 $iotcat_datasets = new IoTCat_datasets($iotcat_datasets_plural_name,$iotcat_datasets_singular_name,array("um_content_restriction"=>$iotcat_datasets_um_content_restriction ),$iotcat_datasets_comment_status );
 $iotcat_data_concepts = new IoTCat_data_concepts($iotcat_data_concepts_plural_name,$iotcat_data_concepts_singular_name,array("um_content_restriction"=>$iotcat_data_concepts_um_content_restriction ),$iotcat_data_concepts_comment_status );
 $iotcat_measurable_quantities = new IoTCat_measurable_quantities($iotcat_measurable_quantities_plural_name,$iotcat_measurable_quantities_singular_name,array("um_content_restriction"=>$iotcat_measurable_quantities_um_content_restriction ),$iotcat_measurable_quantities_comment_status );

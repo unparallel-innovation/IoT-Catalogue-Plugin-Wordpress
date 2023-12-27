@@ -426,6 +426,7 @@ class IoTCat_elements {
 		);
 		$element = array(
 					'post_title'    => $name,
+					'post_name'    => $original_id,
 					'post_status'   => 'publish',
 					'post_content' => $this->get_page_content_with_iframe($name,$description,$website,$embedded_url, $image_url,$tags_path,$original_object),
 					'tags_input' => $this->get_tags_input($tags_path),
