@@ -413,6 +413,14 @@ class IoTCat_elements {
 	}
 
 	private function create_post_element($id,	$name, $description,$website, $embedded_url, $image_url,$tags_path,$original_id,$subscription_id,$last_update_timestamp,$original_object){
+		$post_name = null;
+		if(array_key_exists("_useIdsForPostNames", $original_object) && $original_object["_useIdsForPostNames"] == "1"){
+			$post_name = $original_id;
+		}
+		if(array_key_exists("_postName", $original_object)){
+			$post_name = $original_object["_postName"];
+		}
+
 
 		$meta_input = array_merge(
 			$this->default_metadata,
@@ -424,9 +432,10 @@ class IoTCat_elements {
 						"last_update_timestamp" => $last_update_timestamp
 				)
 		);
+
 		$element = array(
 					'post_title'    => $name,
-					'post_name'    => $original_id,
+					'post_name'    => $post_name,
 					'post_status'   => 'publish',
 					'post_content' => $this->get_page_content_with_iframe($name,$description,$website,$embedded_url, $image_url,$tags_path,$original_object),
 					'tags_input' => $this->get_tags_input($tags_path),
