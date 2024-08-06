@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       IoT Catalogue Integration
  * Description:       Display in WordPress content from IoT Catalogue
- * Version:           1.10.0-3
+ * Version:           1.10.0-4
  * Author:            UNPARALLEL Innovation, Lda
  * Author URI:        https://www.unparallel.pt
  */
@@ -23,7 +23,7 @@
  You should have received a copy of the GNU General Public License
  along with IoT Catalogue Integration. If not, see https://github.com/unparallel-innovation/IoT-Catalogue-Plugin-Wordpress/blob/main/LICENSE.
  */
-
+require_once  __DIR__ . '/includes/libs/action-scheduler/action-scheduler.php';
  require_once  __DIR__ . '/includes/log.php';
  require_once  __DIR__ . '/includes/variables.php';
  if ( is_admin() ) {
@@ -37,7 +37,12 @@
   require_once  __DIR__ . '/includes/iotcat_data_concepts.php';
   require_once  __DIR__ . '/includes/iotcat_measurable_quantities.php';
 
-
+  add_action( 'async_subscribe', 'send_async_subscribe', 10, 2 );
+  function send_async_subscribe() {
+    iotcat_log_me("Starting subscription");
+    $current_subscription = get_option('iotcat_subscription_instance');
+    $current_subscription -> get_data();
+  }
 
 
 
@@ -126,9 +131,11 @@ function iotcat_added_option($option, $value){
   }
 }
 
-function iotcat_sync_data($iotcat_subscription){
-  $iotcat_subscription -> get_data();
 
+
+function iotcat_sync_data($iotcat_subscription){
+
+ as_schedule_single_action(time() ,'async_subscribe', array() );
 
 }
 
@@ -182,7 +189,7 @@ function iotcat_update_data_exec(){
     wp_set_current_user($user_id);
     $current_subscription = get_option('iotcat_subscription_instance');
     if($current_subscription){
-      $current_subscription->get_data();
+      iotcat_sync_data($current_subscription);
     }
   }
 
