@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       IoT Catalogue Integration
  * Description:       Display in WordPress content from IoT Catalogue
- * Version:           1.10.0-4
+ * Version:           1.10.0
  * Author:            UNPARALLEL Innovation, Lda
  * Author URI:        https://www.unparallel.pt
  */
@@ -39,9 +39,16 @@ require_once  __DIR__ . '/includes/libs/action-scheduler/action-scheduler.php';
 
   add_action( 'async_subscribe', 'send_async_subscribe', 10, 2 );
   function send_async_subscribe() {
+    global $iotcat_field_data_update_interval;
     iotcat_log_me("Starting subscription");
     $current_subscription = get_option('iotcat_subscription_instance');
+    if($current_subscription == false) {
+      return;
+    }
     $current_subscription -> get_data();
+    iotcat_log_me("Data synchronized");
+    $interval = intval($iotcat_field_data_update_interval)*60;
+    as_schedule_single_action(time() + $interval ,'async_subscribe', array() );
   }
 
 
@@ -144,6 +151,7 @@ function iotcat_destroy_current_subscription(){
   $current_subscription = get_option('iotcat_subscription_instance');
   if($current_subscription){
     $current_subscription->destroy();
+    as_unschedule_action( 'async_subscribe', array() );
     delete_option('iotcat_subscription_instance');
   }
 }
@@ -172,36 +180,6 @@ function iotcat_updated_option($option, $old_value,$value){
 add_action( 'updated_option', 'iotcat_updated_option', 10, 3 );
 add_action( 'added_option', 'iotcat_added_option', 10, 2 );
 
-add_filter( 'cron_schedules', 'iotcat_add_update_interval' );
-function iotcat_add_update_interval($schedules){
-  global $iotcat_field_data_update_interval;
-  $schedules['iotcat_update_interval'] = array(
-        'interval' => intval($iotcat_field_data_update_interval)*60,
-        'display'  => esc_html__( "Every .$iotcat_field_data_update_interval minutes" ), );
-    return $schedules;
-
-}
-
-
-function iotcat_update_data_exec(){
-  $user_id = get_option("iotcat_plugin_admin_user_id");
-  if($user_id > 0){
-    wp_set_current_user($user_id);
-    $current_subscription = get_option('iotcat_subscription_instance');
-    if($current_subscription){
-      iotcat_sync_data($current_subscription);
-    }
-  }
-
-}
-
-add_action( 'iotcat_update_data', 'iotcat_update_data_exec', 10, 0 );
-
-if ( ! wp_next_scheduled( 'iotcat_update_data' ) ) {
-
-  $current_time = time() + 10;
-  wp_schedule_event($current_time, 'iotcat_update_interval', 'iotcat_update_data' , array(), true);
-}
 
 
 function iotcat_activate() {

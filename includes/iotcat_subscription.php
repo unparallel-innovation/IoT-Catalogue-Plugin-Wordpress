@@ -13,9 +13,12 @@
 
 		}
 
-
-		private function get_tpi_elements_id($page_name){
-			$response = wp_remote_get( $this->base_url.'/api/getTPIElementsId?access_token='.$this->token.'&pageName='.$page_name);
+		public function get_json($url, $attempt = 0){
+			if($attempt > 10){
+				iotcat_log_me("Invalid response from: ".$url);
+				return;
+			}
+			$response = wp_remote_get($url);
 			if(
 				is_array($response) &&
 				array_key_exists("response", $response) &&
@@ -24,25 +27,19 @@
 				$response["response"]["code"] === 200
 			){
 				return json_decode( wp_remote_retrieve_body( $response ), true );
+
 			}else{
-				iotcat_log_me("Invalid response from getTPIElementsId");
+				iotcat_log_me('Failed when trying to retrieve info from '.$url.' attempt number: '.($attempt + 1).' retrying');
+				return $this->get_json($url, $attempt + 1);
 			}
 		}
+
+
+		private function get_tpi_elements_id($page_name){
+			return $this->get_json($this->base_url.'/api/getTPIElementsId?access_token='.$this->token.'&pageName='.$page_name);
+		}
 		private function get_tpi_element($page_name, $id){
-
-			$response = wp_remote_get( $this->base_url.'/api/getTPIElement?access_token='.$this->token.'&pageName='.$page_name.'&id='.$id);
-			if(
-				is_array($response) &&
-				array_key_exists("response", $response) &&
-				is_array($response["response"]) &&
-				array_key_exists("code", $response["response"]) &&
-				$response["response"]["code"] === 200
-			){
-				return json_decode( wp_remote_retrieve_body( $response ), true );
-
-			}else{
-				iotcat_log_me("Invalid response from getTPIElement");
-			}
+			return $this->get_json( $this->base_url.'/api/getTPIElement?access_token='.$this->token.'&pageName='.$page_name.'&id='.$id);
 		}
 
 
