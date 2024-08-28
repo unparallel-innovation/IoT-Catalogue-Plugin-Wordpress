@@ -16,7 +16,7 @@ class IoTCat_elements {
 		add_action('init',array($this,'create_post_type'));
 		add_action('wp_head', array($this,'add_page_header'));
 		add_action('template_redirect', array($this,'process_redirect'),10,0);
-		//add_action('pre_get_posts', array($this,'pre_get_posts'),10,1);
+		add_action('pre_get_posts', array($this,'pre_get_posts'),10,1);
 		add_filter( "get_default_comment_status", array($this,'get_default_comment_status'), 10, 3 );
 
 		$this->icon = 'dashicons-list-view';
