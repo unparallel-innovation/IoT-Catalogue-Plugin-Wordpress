@@ -2,7 +2,7 @@
 	require_once  __DIR__ . '/log.php';
   	require_once  __DIR__ . '/iotcat_components.php';
 
-
+	set_time_limit(0);
 	class IoTCat_subscription {
 		function __construct($token, $iotcat_elements_instances,$base_url ){
 
