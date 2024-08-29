@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       IoT Catalogue Integration
  * Description:       Display in WordPress content from IoT Catalogue
- * Version:           1.10.2
+ * Version:           1.10.3
  * Author:            UNPARALLEL Innovation, Lda
  * Author URI:        https://www.unparallel.pt
  */
@@ -45,10 +45,15 @@ require_once  __DIR__ . '/includes/libs/action-scheduler/action-scheduler.php';
     if($current_subscription == false) {
       return;
     }
-    $current_subscription -> get_data();
-    iotcat_log_me("Data synchronized");
-    $interval = intval($iotcat_field_data_update_interval)*60;
-    as_schedule_single_action(time() + $interval ,'async_subscribe', array() );
+    $user_id = get_option("iotcat_plugin_admin_user_id");
+    if($user_id > 0){
+      wp_set_current_user($user_id);
+      $current_subscription -> get_data();
+      iotcat_log_me("Data synchronized");
+      $interval = intval($iotcat_field_data_update_interval)*60;
+      as_schedule_single_action(time() + $interval ,'async_subscribe', array() );
+    }
+
   }
 
 
